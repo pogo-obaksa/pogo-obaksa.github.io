@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 오박사의 포켓몬고 허브 — 정적 도구 사이트
+# 운영 주소: https://pogo-obaksa.github.io/
