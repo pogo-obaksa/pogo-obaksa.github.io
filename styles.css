@@ -918,7 +918,7 @@ main{
 .gtable{width:100%;border-collapse:collapse;font-size:12.5px;line-height:1.5;}
 .gtable caption{
   caption-side:top;text-align:left;font-size:11px;font-weight:800;color:var(--muted);
-  padding:0 2px 6px;letter-spacing:-.005em;
+  padding:7px 8px 6px;letter-spacing:-.005em;
 }
 .gtable th{
   background:#F1F5F9;color:#0F172A;font-size:11px;font-weight:900;letter-spacing:-.01em;
