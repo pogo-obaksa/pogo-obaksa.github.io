@@ -977,6 +977,7 @@
 
     q.addEventListener('input', function () {
       if (!q.value.trim()) ivState.mon = null;
+      else if (ivState.mon && q.value.trim() !== ivState.mon.n) ivState.mon = null;
       ivSuggest(q.value);
       renderIV();
     });
@@ -998,6 +999,9 @@
     sug.addEventListener('click', function (e) {
       var b = e.target.closest('[data-iv-dex]');
       if (b) ivPick(Number(b.getAttribute('data-iv-dex')));
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.iv-search')) sug.hidden = true;
     });
 
     var league = $('#iv-league');
