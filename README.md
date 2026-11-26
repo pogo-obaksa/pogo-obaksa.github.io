@@ -66,6 +66,20 @@ python3 tools/build_pokedex.py [원본폴더]      # 기본: build/pokedex_src
 - 원본: pogoapi.net(pokemon_stats·pokemon_types·current_pokemon_moves·shiny_pokemon·pokemon_buddy_distances·pokemon_candy_to_evolve) + PokeAPI(한국어 이름·기술명 CSV)
 - 최대 CP는 15/15/15 기준 `floor((A+15)×√(D+15)×√(S+15)×CPM²÷10)` 로 화면에서 계산합니다.
 
+## 이미지(스프라이트·일러스트) 호스트
+
+포켓몬 이미지는 모두 같은 저장소(PokeAPI/sprites)에서 받아 오는데, 국내 PC 네트워크에서
+`raw.githubusercontent.com` 이 막히는 사례가 있어 **기본 호스트를 jsDelivr CDN 으로 두었다.**
+
+- 기본: `https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/…` (`app.js` 의 `CDN_HOST`)
+- 폴백: 이미지 로드가 실패하면 `__spriteFallback()` 이 같은 경로를
+  `https://raw.githubusercontent.com/PokeAPI/sprites/master/…` 로 **1회만** 바꿔 재시도하고,
+  그마저 실패하면 각 자리의 기존 폴백(이모지 · 👾 · 숨김)이 동작한다.
+- 도감 카드의 이로치 이미지는 `data-alt-src` 로 일반 일러스트가 준비돼 있어
+  CDN → raw → 일반 일러스트 → raw 순으로 내려간다.
+- `index.html` 의 `styles.css?v=…` · `app.js?v=…` 는 파일을 고칠 때마다 같이 올려
+  PC 브라우저 캐시를 확실히 비운다.
+
 ## 배포 (서버비 0원)
 
 ### 1) Cloudflare Pages — 가장 빠름
