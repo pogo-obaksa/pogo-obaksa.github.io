@@ -1,5 +1,5 @@
 /* =========================================================
-   오박사의 포켓몬고 허브 — app.js
+   오박사의 포켓몬 백과사전 — app.js (포켓몬고 허브)
    의존: data/types.js (window.PGO), data/events.js (HUB_EVENTS), data/raids.js (HUB_BOSSES, HUB_COUNTERS)
    ========================================================= */
 (function () {
@@ -336,19 +336,25 @@
     renderHeroNext(now, ev.id);
   }
 
+  /* ─────────────── 다음 일정 ───────────────
+     이미 진행 중인 이벤트는 여기 넣지 않는다 — 아래 '진행 중' 섹션에만 둔다. */
   var heroNextSig = '';
+  function nextUpcoming(now, excludeId, limit) {
+    var items = [];
+    EVENTS.forEach(function (ev) {
+      if (excludeId && ev.id === excludeId) return;
+      var s = parse(ev.start);
+      if (s === null || s <= now) return;
+      items.push({ when: s, ev: ev, mode: 'start' });
+    });
+    items.sort(function (a, b) { return a.when - b.when || (b.ev.priority || 0) - (a.ev.priority || 0); });
+    return items.slice(0, limit || 3);
+  }
+
   function renderHeroNext(now, excludeId) {
     var el = $('#hero-next');
     if (!el) return;
-    var items = [];
-    EVENTS.forEach(function (ev) {
-      if (ev.id === excludeId) return;
-      var s2 = parse(ev.start), e2 = parse(ev.end);
-      if (s2 !== null && now < s2) items.push({ when: s2, ev: ev, mode: 'start' });
-      else if (e2 !== null && now < e2) items.push({ when: e2, ev: ev, mode: 'end' });
-    });
-    items.sort(function (a, b) { return a.when - b.when; });
-    items = items.slice(0, 3);
+    var items = nextUpcoming(now, excludeId, 3);
     var sig = items.map(function (it) { return it.ev.id + it.when; }).join('|');
     if (sig === heroNextSig) return;
     heroNextSig = sig;
@@ -1262,7 +1268,7 @@
     artEl.hidden = false;
     artEl.innerHTML = guideArticleHTML(g);
     placeGuidePromos('article');
-    document.title = g.title + ' | 오박사의 포켓몬고 허브';
+    document.title = g.title + ' | 오박사의 포켓몬 백과사전';
 
     var nav = (opts && opts.nav) || 'push';
     if (nav === 'push' && history.pushState) history.pushState(null, '', '#guide/' + g.slug);
@@ -1371,7 +1377,7 @@
     privacy: {
       title: '개인정보처리방침',
       body:
-        '<p>본 사이트(「오박사의 포켓몬고 허브」)는 이용자의 개인정보를 소중히 생각하며, 관련 법령을 준수합니다.</p>' +
+        '<p>본 사이트(「오박사의 포켓몬 백과사전」)는 이용자의 개인정보를 소중히 생각하며, 관련 법령을 준수합니다.</p>' +
         '<h3>1. 수집하는 정보</h3>' +
         '<ul>' +
         '<li>회원가입·로그인이 없는 사이트로, 이름·전화번호·주소 같은 개인정보를 직접 수집하지 않습니다.</li>' +
@@ -1397,7 +1403,7 @@
     terms: {
       title: '이용약관',
       body:
-        '<h3>1. 목적</h3><p>본 약관은 「오박사의 포켓몬고 허브」(이하 "사이트")가 제공하는 정보·계산 도구의 이용 조건을 정합니다.</p>' +
+        '<h3>1. 목적</h3><p>본 약관은 「오박사의 포켓몬 백과사전」(이하 "사이트")가 제공하는 정보·계산 도구의 이용 조건을 정합니다.</p>' +
         '<h3>2. 서비스 내용</h3>' +
         '<ul><li>포켓몬고 이벤트 일정 및 카운트다운</li><li>레이드 보스 약점·추천 카운터 정보</li><li>타입 상성 계산기, 육성 비용 계산기</li><li>관련 가이드 콘텐츠</li></ul>' +
         '<h3>3. 정보의 정확성</h3>' +
@@ -1438,7 +1444,7 @@
     about: {
       title: '소개',
       body:
-        '<p>「오박사의 포켓몬고 허브」는 포켓몬고를 오래 즐겨 온 트레이너가 매일 쓰려고 만든 도구 모음입니다.</p>' +
+        '<p>「오박사의 포켓몬 백과사전」은 포켓몬고를 오래 즐겨 온 트레이너가 매일 쓰려고 만든 도구 모음입니다.</p>' +
         '<p>해외 일정 사이트는 시간이 현지 기준이라 매번 계산해야 하고, 카운터 정보는 여러 페이지를 오가야 했습니다. 그래서 <strong>한국 시간 기준 일정 · 약점과 카운터 · 육성 비용</strong>을 한 화면에 모았습니다.</p>' +
         '<p>광고는 서버 유지비를 위해 일정과 본문 사이의 빈 영역에만 배치하며, 콘텐츠를 가리지 원칙으로 운영합니다.</p>' +
         '<p>운영: 오박사의 포켓몬 백과사전 (blog.naver.com/seopp)</p>'
@@ -1482,7 +1488,7 @@
       var url = location.href;
       track('share', { method: navigator.share ? 'native' : (navigator.clipboard ? 'clipboard' : 'none') });
       if (navigator.share) {
-        navigator.share({ title: '오박사의 포켓몬고 허브', url: url }).catch(function () {});
+        navigator.share({ title: '오박사의 포켓몬 백과사전', url: url }).catch(function () {});
         return;
       }
       if (navigator.clipboard) {
@@ -1495,7 +1501,68 @@
   }
 
   /* ─────────────── 제휴 배너 (쿠팡 파트너스 · 겜스고) ───────────────
+     배너 마크업은 HTML에 두지 않고 여기서 만든다 — 스위치 하나로 켜고 끌 수 있게.
      이동은 링크 기본 동작에 맡기고, 클릭만 GA4 partner_click 으로 남긴다. */
+  var ENABLE_AFFILIATE_BANNERS = false;   /* ← 애드센스 승인 후 true 로 바꾸면 그대로 복구 */
+
+  var PROMO_ITEMS = [
+    {
+      slot: 'events-top', partner: 'coupang', mark: '쿠팡',
+      eyebrow: '포켓몬고 필수템 · 쿠팡',
+      title: '포고플 오토캐치 — 자동 충전식 · 배터리 교체형',
+      desc: '켜 두면 알아서 몬스터볼을 던집니다.',
+      cta: '쿠팡에서 보기',
+      href: 'https://link.coupang.com/a/iYJYCkpdYW',
+      aria: '쿠팡 파트너스 — 포고플 포켓몬고 오토캐치 상품 보기 (새 창)',
+      note: '이 배너는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
+    },
+    {
+      slot: 'raids-bottom', partner: 'gamsgo', mark: '겜스고',
+      eyebrow: '포켓코인 충전 · 겜스고',
+      title: '포켓코인·레이드패스, 정가보다 최대 60% 저렴',
+      desc: '550+50부터 87,000+6,000 포켓코인까지, 계정으로 바로 충전합니다.',
+      cta: '겜스고에서 보기',
+      href: 'https://www.gamsgo.com/partner/cYpzj',
+      aria: '겜스고 — 포켓몬고 포켓코인 충전 보기 (새 창)',
+      note: '겜스고 제휴 링크입니다. 이 링크를 거쳐 구매하면 일정액의 수수료를 받을 수 있습니다.'
+    },
+    {
+      slot: 'guide-mid', partner: 'coupang', mark: '쿠팡',
+      eyebrow: '포켓몬고 필수템 · 쿠팡',
+      title: '커뮤니티데이 3시간, 손가락 대신 포고플',
+      desc: '몬스터볼·사탕을 자동으로 모아 줍니다.',
+      cta: '쿠팡에서 보기',
+      href: 'https://link.coupang.com/a/iYJYCkpdYW',
+      aria: '쿠팡 파트너스 — 포고플 포켓몬고 오토캐치 상품 보기 (새 창)',
+      note: '이 배너는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.'
+    },
+    {
+      slot: 'guide-bottom', partner: 'gamsgo', mark: '겜스고',
+      eyebrow: '포켓코인 충전 · 겜스고',
+      title: '레이드패스·GO패스도 겜스고에서',
+      desc: '포켓코인부터 리모트 레이드패스까지 한곳에서, 계정 직접 충전.',
+      cta: '겜스고에서 보기',
+      href: 'https://www.gamsgo.com/partner/cYpzj',
+      aria: '겜스고 — 포켓몬고 포켓코인 충전 보기 (새 창)',
+      note: '겜스고 제휴 링크입니다. 이 링크를 거쳐 구매하면 일정액의 수수료를 받을 수 있습니다.'
+    }
+  ];
+
+  function promoHTML(item) {
+    return '<a class="promo promo--' + item.partner + '" href="' + item.href + '"' +
+      ' target="_blank" rel="noopener noreferrer sponsored"' +
+      ' data-partner="' + item.partner + '" data-slot="' + item.slot + '" aria-label="' + item.aria + '">' +
+      '<span class="promo-mark" aria-hidden="true">' + item.mark + '</span>' +
+      '<span class="promo-main">' +
+        '<span class="promo-eyebrow">' + item.eyebrow + '</span>' +
+        '<strong class="promo-title">' + item.title + '</strong>' +
+        '<span class="promo-desc">' + item.desc + '</span>' +
+      '</span>' +
+      '<span class="promo-cta">' + item.cta + '<span class="promo-arrow" aria-hidden="true">→</span></span>' +
+      '</a>' +
+      '<p class="promo-note">' + item.note + '</p>';
+  }
+
   function initPromoBanners() {
     $$('a.promo[data-partner]').forEach(function (link) {
       link.addEventListener('click', function () {
@@ -1505,6 +1572,20 @@
         });
       });
     });
+  }
+
+  function renderPromoBanners() {
+    var hosts = $$('[data-promo-slot]');
+    if (!ENABLE_AFFILIATE_BANNERS) {
+      /* 심사 기간: 자리 자체를 지워서 배너도 제휴 고지도 여백도 남기지 않는다 */
+      hosts.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+      return;
+    }
+    PROMO_ITEMS.forEach(function (item) {
+      var host = $('[data-promo-slot="' + item.slot + '"]');
+      if (host) host.innerHTML = promoHTML(item);
+    });
+    initPromoBanners();
   }
 
   var toastTimer = null;
@@ -1536,7 +1617,7 @@
     initDex();
     initModals();
     initShare();
-    initPromoBanners();
+    renderPromoBanners();
     initGuides();
 
     window.addEventListener('popstate', routeFromLocation);
@@ -1597,6 +1678,7 @@
     costAt: costAt,
     computeCounters: computeCounters,
     eventState: eventState,
+    nextUpcoming: nextUpcoming,
     kstClock: kstClock,
     selectBoss: selectBoss,
     switchTab: switchTab,

@@ -1,4 +1,4 @@
-# 오박사의 포켓몬고 허브 (프로토타입)
+# 오박사의 포켓몬 백과사전 — 포켓몬고 허브 (프로토타입)
 
 포켓몬고 트레이너용 **올인원 정적 웹앱**. 빌드 도구 없이 `index.html`을 열면 바로 동작하고,
 Cloudflare Pages · Vercel · GitHub Pages 어디에나 **서버비 0원**으로 올릴 수 있습니다.
@@ -7,7 +7,11 @@ Cloudflare Pages · Vercel · GitHub Pages 어디에나 **서버비 0원**으로
 
 ```
 web/pokemongo-hub/
-├── index.html            # 화면 구조(5개 탭 · 푸터 · 정책 모달 · 도감 상세 시트) + Pretendard 웹폰트
+├── index.html            # 화면 구조(5개 탭 · 푸터 · 정책 링크 · 도감 상세 시트) + Pretendard 웹폰트
+├── privacy.html          # 개인정보처리방침(독립 URL)
+├── terms.html            # 이용약관(독립 URL)
+├── disclaimer.html       # 면책조항(독립 URL)
+├── sitemap.xml           # 검색·애드센스 봇용 사이트맵
 ├── styles.css            # 라이트 테마(스카이·민트·몬스터볼 레드) · 모바일 퍼스트 반응형
 ├── app.js                # 카운트다운·카운터 계산·타입 상성·육성 계산·도감 검색·가이드 라우팅 로직
 ├── data/

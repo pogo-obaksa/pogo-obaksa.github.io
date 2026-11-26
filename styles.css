@@ -1,5 +1,5 @@
 /* =========================================================
-   오박사의 포켓몬고 허브 — styles.css
+   오박사의 포켓몬 백과사전 — styles.css
    라이트 테마 · 스카이/민트 · 포켓몬고 게임 UI
    ========================================================= */
 
@@ -629,11 +629,13 @@ main{
 .footer-brand{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:6px;color:#0F172A;}
 .footer-desc{font-size:13px;color:var(--muted);}
 .footer-links{display:flex;flex-wrap:wrap;gap:6px 16px;margin:14px 0;}
-.footer-links button{
+.footer-links button,
+.footer-links a{
   background:none;border:none;padding:0;font-size:12.5px;font-weight:700;color:var(--text-dim);
-  text-decoration:underline;text-underline-offset:3px;
+  text-decoration:underline;text-underline-offset:3px;font-family:inherit;line-height:inherit;
 }
-.footer-links button:hover{color:var(--accent-ink);}
+.footer-links button:hover,
+.footer-links a:hover{color:var(--accent-ink);}
 .footer-legal{font-size:11.5px;color:var(--muted-2);line-height:1.72;margin:6px 0;}
 
 /* ─────────── modal ─────────── */
@@ -1034,4 +1036,42 @@ main{
 
 @media(prefers-reduced-motion:reduce){
   *{transition:none!important;animation:none!important;}
+}
+
+/* ─────────── 정책 독립 페이지 (/privacy.html · /terms.html · /disclaimer.html) ─────────── */
+.policy-main{max-width:760px;margin:0 auto;padding:22px 16px 8px;}
+.policy-crumb{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 14px;font-size:12.5px;font-weight:700;color:var(--muted);}
+.policy-crumb a{color:var(--accent-ink);text-decoration:none;}
+.policy-crumb a:hover{text-decoration:underline;text-underline-offset:3px;}
+.policy-head{margin:0 0 18px;}
+.policy-head h1{font-size:24px;margin:0 0 8px;letter-spacing:-.02em;}
+.policy-head p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.7;word-break:keep-all;}
+.policy-card{background:#FFFFFF;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:20px 18px 8px;}
+.policy-card h2{font-size:17px;margin:22px 0 8px;padding-top:16px;border-top:1px solid var(--line-soft);}
+.policy-card h2:first-child{margin-top:0;padding-top:0;border-top:0;}
+.policy-card h3{font-size:14.5px;margin:16px 0 6px;color:#0F172A;}
+.policy-card p,.policy-card li{font-size:14px;color:var(--text-dim);line-height:1.75;word-break:keep-all;}
+.policy-card ul{padding-left:20px;margin:0 0 12px;}
+.policy-card li{margin-bottom:6px;}
+.policy-card strong{color:#0F172A;}
+.policy-card a{color:var(--accent-ink);}
+.policy-meta{margin:16px 0 0;font-size:12.5px;color:var(--muted-2);}
+.policy-links{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 0;}
+.policy-links a{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;
+  background:#FFFFFF;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:12.5px;font-weight:800;text-decoration:none;box-shadow:var(--shadow-sm);
+}
+.policy-links a:hover{border-color:#7DD3FC;color:var(--sky-deep);}
+.policy-links a[aria-current="page"]{background:var(--sky-soft);border-color:#BAE6FD;color:#075985;}
+.header-inner .home-link{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;
+  background:#FFFFFF;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:12.5px;font-weight:800;text-decoration:none;box-shadow:0 2px 0 rgba(15,23,42,.05);
+  white-space:nowrap;
+}
+.header-inner .home-link:hover{border-color:#7DD3FC;color:var(--sky-deep);}
+@media(max-width:480px){
+  .policy-head h1{font-size:21px;}
+  .policy-card{padding:16px 14px 6px;}
 }
