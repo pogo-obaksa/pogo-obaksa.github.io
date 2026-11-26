@@ -98,6 +98,7 @@ a{color:var(--accent-ink);}
 }
 .brand{display:flex;align-items:center;gap:10px;min-width:0;text-decoration:none;color:inherit;cursor:pointer;border-radius:10px;}
 .brand:hover .brand-text strong{color:var(--sky-deep);}
+@media (hover:none){.brand:hover .brand-text strong{color:#0F172A;}}
 .brand:active .brand-ball{transform:scale(.93);}
 .brand:focus-visible{outline:2px solid var(--sky);outline-offset:3px;}
 .brand-ball{
