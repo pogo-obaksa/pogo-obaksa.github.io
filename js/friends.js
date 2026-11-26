@@ -391,4 +391,5 @@ setInterval(tick, 15000);
 setInterval(function () { if (Date.now() < state.coolingUntil) refreshCooldown(); }, 1000);
 render();
 window.__frReady = true;
+window.__frBuild = 'fc3';
 window.__friends = { state, render, visibleDocs, formatCode, remainText };
