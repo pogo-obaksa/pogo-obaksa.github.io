@@ -17,8 +17,8 @@
 <!-- Google AdSense — 사이트 소유권 확인 · 광고 게재 (게시자 ID pub-2879207392914466) -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2879207392914466" crossorigin="anonymous"></script>
 <title>오박사의 포켓몬 백과사전 | 포켓몬고 일정·한글 도감·레이드 카운터·배틀리그 IV·PvP 티어</title>
-<meta name="description" content="포켓몬고 한글 도감(이름·초성·도감번호 검색, 이로치·최대 CP·기술), 한국 시간 일정 카운트다운, 레이드 보스 약점과 추천 카운터 TOP 6(졸업 스킬), 배틀리그 IV 순위 계산기·PvP 티어 TOP 30, 별의모래·사탕 육성 계산기, 타입 상성표, 초보·복귀용 공략 12편까지 한 화면에서.">
-<meta name="keywords" content="포켓몬고 도감, 포켓몬고 한글 도감, 포켓몬고 일정, 레이드 카운터, 배틀리그 IV, PvP 티어, 슈퍼리그 1500, 하이퍼리그 2500, 타입 상성, 별의모래 계산기, 육성 계산기, 테오키스, 메가메타그로스">
+<meta name="description" content="포켓몬고 한글 도감(이름·초성·도감번호 검색, 이로치·최대 CP·기술), 한국 시간 일정 카운트다운, 레이드 보스 약점과 추천 카운터 TOP 6(졸업 스킬), 레이드 인원별 클리어 계산, 배틀리그 IV 순위 계산기·PvP 티어 TOP 30·내 파티 3마리 약점 진단, 게임 검색창에 붙여넣는 한글 검색식 생성기, 내 이로치·이벤트 체크, 별의모래·사탕 육성 계산기, 타입 상성표, 초보·복귀용 공략 12편까지 한 화면에서.">
+<meta name="keywords" content="포켓몬고 도감, 포켓몬고 한글 도감, 포켓몬고 도감번호 검색, 포켓몬고 일정, 레이드 카운터, 레이드 인원 계산, 배틀리그 IV, PvP 티어, 파티 약점 진단, 포켓몬고 검색어, 박스 정리 검색식, 이로치 체크, 슈퍼리그 1500, 하이퍼리그 2500, 타입 상성, 별의모래 계산기, 육성 계산기, 테오키스, 메가메타그로스">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#F4F7FA">
 <meta property="og:type" content="website">
@@ -41,7 +41,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23f5f7ff' stroke='%230b1020' stroke-width='8'/%3E%3Cpath d='M6 50h88' stroke='%230b1020' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%230b1020'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23f5f7ff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-<link rel="stylesheet" href="styles.css?v=20261126ef2">
+<link rel="stylesheet" href="styles.css?v=20261126ef3">
 </head>
 <body>
 
@@ -137,6 +137,7 @@
     <div class="promo-slot" id="promo-events-top" data-promo-slot="events-top"></div>
 
     <h3 class="section-title" id="ongoing-title">진행 중 <span class="count-pill" id="ongoing-count">0</span></h3>
+    <div class="event-progress" id="event-progress" hidden></div>
     <div class="event-list" id="ongoing-list"></div>
 
     <h3 class="section-title">곧 시작 <span class="count-pill" id="upcoming-count">0</span></h3>
@@ -181,6 +182,49 @@
 
       <h4 class="sub-head">추천 카운터 TOP 6</h4>
       <div class="counter-list" id="boss-counters"></div>
+
+      <div class="rc-block" id="raid-count">
+        <h4 class="sub-head">몇 명이면 깰까? — 인원별 클리어 계산</h4>
+        <div class="rc-form">
+          <label class="field">
+            <span>참여 인원</span>
+            <select id="rc-people">
+              <option value="1">1명 (혼자)</option>
+              <option value="2">2명</option>
+              <option value="3" selected>3명</option>
+              <option value="4">4명</option>
+              <option value="5">5명</option>
+              <option value="6">6명</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>평균 트레이너 레벨</span>
+            <select id="rc-level">
+              <option value="30">30</option>
+              <option value="40" selected>40</option>
+              <option value="50">50</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>날씨 부스트</span>
+            <select id="rc-weather">
+              <option value="0" selected>없음</option>
+              <option value="1">있음 (+20%)</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>프렌드 보너스</span>
+            <select id="rc-friend">
+              <option value="none" selected>없음</option>
+              <option value="ultra">울트라 (+7%)</option>
+              <option value="best">베스트 (+10%)</option>
+            </select>
+          </label>
+        </div>
+        <div class="rc-verdict" id="rc-verdict" aria-live="polite"></div>
+        <div class="rc-table" id="rc-table"></div>
+        <p class="rc-note" id="rc-note"></p>
+      </div>
       <p class="fineprint" style="margin-top:10px">
         <strong>졸업 스킬</strong>은 그 포켓몬이 쓸 수 있는 조합 중 사이클 DPS가 가장 높은 노말·스페셜 기술이고,
         <span class="elite">ⓔ</span>는 엘리트 기술(기술머신·이벤트 한정)입니다. 순위는 40레벨·개체값 15 기준
@@ -215,6 +259,78 @@
   <!-- ══════════════════ 탭 3 : 도감 ══════════════════ -->
   <section class="tab-panel" id="tab-pokedex" role="tabpanel" aria-labelledby="tabbtn-pokedex" hidden>
 
+    <article class="panel sg-panel" id="sg-panel">
+      <h3 class="panel-title">🔤 게임 검색창에 바로 붙여넣는 한글 검색식</h3>
+      <p class="panel-desc">
+        포켓몬고 박스 검색창에 넣는 코드를 <strong>한글 그대로</strong> 만들어 드려요.
+        해외 사이트는 영어로만 알려 줘서 매번 바꿔 쳐야 했죠. 프리셋을 누르거나 조건을 골라 복사한 뒤 게임에 붙여넣으면 됩니다.
+      </p>
+
+      <div class="sg-presets" id="sg-presets" role="group" aria-label="검색식 프리셋"></div>
+
+      <div class="sg-out">
+        <code class="sg-code" id="sg-code">조건을 고르면 검색식이 여기에 나와요</code>
+        <button class="sg-copy" id="sg-copy" type="button">복사</button>
+      </div>
+      <p class="sg-note" id="sg-note"></p>
+
+      <details class="detail-wrap sg-detail" id="sg-detail">
+        <summary>조건 직접 고르기</summary>
+        <div class="sg-block">
+          <h4 class="sg-h">검색에서 뺄 것</h4>
+          <div class="sg-chips" id="sg-exclude" role="group" aria-label="검색에서 제외할 조건"></div>
+        </div>
+        <div class="sg-selects">
+          <label class="field">
+            <span>개체값(별) 조건</span>
+            <select id="sg-grade">
+              <option value="" selected>전체</option>
+              <option value="4*">4성 (100%만)</option>
+              <option value="3*,4*">3~4성</option>
+              <option value="0*,1*,2*">2성 이하</option>
+              <option value="0*">0성만</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>잡은 시기</span>
+            <select id="sg-days">
+              <option value="" selected>전체</option>
+              <option value="일수0">오늘 잡은 것</option>
+              <option value="일수0-1">최근 2일</option>
+              <option value="일수0-7">최근 7일</option>
+              <option value="일수0-30">최근 30일</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>배틀리그 개체값</span>
+            <select id="sg-iv">
+              <option value="" selected>상관없음</option>
+              <option value="0-1공격&3-4방어&3-4HP">0~1 공격·3~4 방어·HP</option>
+              <option value="4공격&4방어&4HP">공격·방어·HP 모두 최대</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>CP 범위</span>
+            <select id="sg-cp">
+              <option value="" selected>전체</option>
+              <option value="cp-1500">CP 1500 이하 (슈퍼리그)</option>
+              <option value="cp-2500">CP 2500 이하 (하이퍼리그)</option>
+              <option value="cp1500-2500">CP 1500~2500</option>
+              <option value="cp2500-">CP 2500 이상</option>
+              <option value="cp-100">CP 100 이하 (사탕용)</option>
+            </select>
+          </label>
+        </div>
+
+        <p class="fineprint sg-fine">
+          게임 안 검색창의 한국어 검색어를 그대로 씁니다 — <strong>색이 다른</strong>=이로치, <strong>반짝반짝</strong>=럭키,
+          <strong>전설의 포켓몬</strong>=전설, <strong>#</strong>=태그, <strong>@기술</strong>=특별한 기술(레거시),
+          <strong>일수0-7</strong>=최근 7일, <strong>cp-1500</strong>=CP 1500 이하입니다.
+          대량 보내기 전에는 검색 결과에 남겨 둘 포켓몬이 없는지 한 번 더 확인하세요. 보내기는 되돌릴 수 없어요.
+        </p>
+      </details>
+    </article>
+
     <div class="dex-search">
       <div class="dex-search-field">
         <span class="dex-search-icon" aria-hidden="true">🔍</span>
@@ -224,6 +340,7 @@
       </div>
       <div class="dex-tools">
         <button class="chip dex-shiny-chip" id="dex-shiny-only" type="button" aria-pressed="false">✨ 이로치만</button>
+        <button class="chip dex-own-chip" id="dex-own-only" type="button" aria-pressed="false">🏅 내 이로치 <b id="dex-own-count">0</b></button>
         <span class="dex-count" id="dex-count"></span>
       </div>
     </div>
@@ -362,6 +479,29 @@
 
   <!-- ══════════════════ 탭 : 배틀리그 티어 ══════════════════ -->
   <section class="tab-panel" id="tab-tier" role="tabpanel" aria-labelledby="tabbtn-tier" hidden>
+
+    <article class="panel party-panel" id="party-panel">
+      <h3 class="panel-title">🛡️ 내 배틀 파티 3마리 약점 진단</h3>
+      <p class="panel-desc">
+        PvPoke 팀 빌더와 같은 분석을 <strong>한글로</strong> 해 드려요. 리그를 고르고 3마리를 넣으면
+        어떤 타입에 약한지, 어떤 타입을 못 찌르는지, 상위 메타에서 누구를 조심해야 하는지 정리합니다.
+      </p>
+
+      <div class="seg-group iv-league" id="party-league" role="group" aria-label="리그 선택">
+        <button class="seg is-active" type="button" data-party-lg="1500">슈퍼리그 1500</button>
+        <button class="seg" type="button" data-party-lg="2500">하이퍼리그 2500</button>
+      </div>
+
+      <div class="party-slots" id="party-slots"></div>
+
+      <div class="party-result" id="party-result" aria-live="polite"></div>
+
+      <p class="fineprint">
+        방어 상성은 각 포켓몬의 타입만 보고 계산합니다(기술 배치·실제 내구는 넣지 않았어요).
+        커버리지도 자속 타입 기술만 기준이라, 서브 기술까지 넣으면 결과가 조금 달라질 수 있습니다.
+        주의 메타는 이 리그 TOP 30 중에서 “우리가 1.6배로 못 찌르면서 우리를 1.6배로 때리는” 상대를 위협도 순으로 골랐어요.
+      </p>
+    </article>
 
     <article class="panel tier-panel">
       <h3 class="panel-title">🏆 배틀리그 인기 TOP 30</h3>
@@ -518,7 +658,8 @@
 <script src="data/cpm.js"></script>
 <script src="data/raid-counters.js"></script>
 <script src="data/pvp-tier.js"></script>
+<script src="data/sprites.js"></script>
 <script src="data/guides.js"></script>
-<script src="app.js?v=20261126ef2"></script>
+<script src="app.js?v=20261126ef3"></script>
 </body>
 </html>

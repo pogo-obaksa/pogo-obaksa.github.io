@@ -16,6 +16,7 @@
   var RAID_TOP = window.HUB_RAID_TOP || {};
   var PVP_TIER = window.HUB_PVP_TIER || {};
   var CPM_TABLE = window.HUB_CPM || {};
+  var SPRITE_MAP = window.HUB_SPRITE_MAP || {};
 
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
@@ -55,6 +56,101 @@
     return false;
   }
   window.__spriteFallback = spriteFallback;
+
+  /* ─────────────── 포켓몬 아이콘 (이름 → 도감번호) ───────────────
+     배틀리그 티어·레이드 카운터 데이터에는 한글 이름만 있어서, data/sprites.js 의
+     이름→도감번호 표를 먼저 찾고, 없으면 메가·그림자 접두어와 괄호 폼을 떼고 다시 찾는다. */
+  var DEX_BY_NAME = null;
+
+  function dexIdOfName(name) {
+    if (!name) return 0;
+    if (SPRITE_MAP[name]) return SPRITE_MAP[name];
+    if (!DEX.length) return 0;
+    if (!DEX_BY_NAME) {
+      DEX_BY_NAME = {};
+      DEX.forEach(function (p) { if (!DEX_BY_NAME[p.n]) DEX_BY_NAME[p.n] = p.id; });
+    }
+    var cands = [
+      name,
+      name.replace('그림자 ', ''),
+      name.replace(/^메가/, ''),
+      name.replace(/\s*[\(（][^\)）]*[\)）]\s*$/, ''),
+      name.replace('그림자 ', '').replace(/^메가/, '').replace(/\s*[\(（][^\)）]*[\)）]\s*$/, '')
+    ];
+    for (var i = 0; i < cands.length; i++) if (DEX_BY_NAME[cands[i]]) return DEX_BY_NAME[cands[i]];
+    return 0;
+  }
+
+  /* 도감 카드·보스 카드와 같은 CDN 스프라이트를 작은 아이콘으로 */
+  function monSpriteHTML(name, cls, size) {
+    var dex = typeof name === 'number' ? name : dexIdOfName(name);
+    var px = size || 40;
+    var klass = 'mon-sprite' + (cls ? ' ' + cls : '') + (dex ? '' : ' is-empty');
+    if (!dex) return '<span class="' + klass + '" aria-hidden="true"></span>';
+    return '<img class="' + klass + '" src="' + SPRITE(dex) + '" alt="" loading="lazy" decoding="async" ' +
+      'width="' + px + '" height="' + px + '" ' +
+      'onerror="__spriteFallback(this)||(this.style.visibility=\'hidden\')">';
+  }
+
+  /* ─────────────── 내 체크리스트 (브라우저에만 저장) ───────────────
+     서버가 없는 정적 사이트라 이로치 보유·이벤트 완료 체크는 localStorage 에만 남긴다.
+     시크릿 모드처럼 저장이 막힌 브라우저에서도 화면이 멈추지 않게 전부 감싸 둔다. */
+  var LS_KEY_SHINY = 'pgoHub.myShiny.v1';
+  var LS_KEY_EVENT = 'pgoHub.eventDone.v1';
+
+  function lsGet(key, fallback) {
+    try {
+      var raw = window.localStorage.getItem(key);
+      if (!raw) return fallback;
+      var v = JSON.parse(raw);
+      return v == null ? fallback : v;
+    } catch (e) { return fallback; }
+  }
+
+  function lsSet(key, value) {
+    try { window.localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch (e) { return false; }
+  }
+
+  var myShiny = {};
+  (function () {
+    var arr = lsGet(LS_KEY_SHINY, []);
+    if (Object.prototype.toString.call(arr) === '[object Array]') {
+      arr.forEach(function (id) { if (Number(id) > 0) myShiny[Number(id)] = 1; });
+    }
+  })();
+
+  function shinyOwned(id) { return !!myShiny[id]; }
+
+  function shinyCount() {
+    var n = 0;
+    for (var k in myShiny) if (myShiny.hasOwnProperty(k)) n++;
+    return n;
+  }
+
+  function shinySave() {
+    var ids = Object.keys(myShiny).map(Number).filter(function (n) { return n > 0; })
+      .sort(function (a, b) { return a - b; });
+    lsSet(LS_KEY_SHINY, ids);
+    var el = $('#dex-own-count');
+    if (el) el.textContent = ids.length;
+  }
+
+  function shinySet(id, on) {
+    id = Number(id);
+    if (!id) return;
+    if (on) myShiny[id] = 1; else delete myShiny[id];
+    shinySave();
+  }
+
+  var eventDone = {};
+  (function () {
+    var obj = lsGet(LS_KEY_EVENT, {});
+    if (obj && typeof obj === 'object' && Object.prototype.toString.call(obj) !== '[object Array]') eventDone = obj;
+  })();
+
+  function eventDoneSave() { lsSet(LS_KEY_EVENT, eventDone); }
+  function eventIsDone(id) { return !!eventDone[id]; }
 
   /* ─────────────── GA4 이벤트 ───────────────
      gtag.js가 없거나(오프라인·광고차단) 로드에 실패해도 절대 에러가 나지 않게 감싼다. */
@@ -252,6 +348,11 @@
               (st === 'past' ? '종료' : '--:--:--') +
             '</span>' +
           '</div>' +
+          (st !== 'past'
+            ? '<button class="event-done' + (eventIsDone(ev.id) ? ' is-done' : '') + '" type="button" data-event-done="' + ev.id +
+              '" aria-pressed="' + (eventIsDone(ev.id) ? 'true' : 'false') + '">' +
+              '<span class="ed-box" aria-hidden="true">' + (eventIsDone(ev.id) ? '✓' : '') + '</span> 완료 체크</button>'
+            : '') +
           (ev.tip ? '<p class="event-tip">💡 ' + ev.tip + '</p>' : '') +
         '</div>' +
       '</article>';
@@ -296,6 +397,53 @@
 
     updateHero(now);
     updateTimers(now);
+    updateEventProgress(now);
+  }
+
+  /* ─────────────── 이벤트 완료 체크 (브라우저 저장) ─────────────── */
+  function updateEventProgress(now) {
+    var el = $('#event-progress');
+    if (!el) return;
+    now = now || Date.now();
+    var ongoing = EVENTS.filter(function (ev) { return eventState(ev, now) === 'ongoing'; });
+    if (!ongoing.length) { el.hidden = true; el.innerHTML = ''; return; }
+    var done = ongoing.filter(function (ev) { return eventIsDone(ev.id); }).length;
+    el.hidden = false;
+    el.innerHTML = '<span class="ep-icon" aria-hidden="true">✅</span>' +
+      '<span class="ep-text">진행 중 <b>' + ongoing.length + '</b>개 중 <b>' + done + '</b>개 완료</span>' +
+      '<span class="ep-hint">이 브라우저에만 저장</span>' +
+      (done ? '<button class="ep-reset" id="event-done-reset" type="button">기록 지우기</button>' : '');
+  }
+
+  function initEventChecks() {
+    var root = $('#tab-events');
+    if (!root) return;
+    root.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-event-done]');
+      if (btn) {
+        var id = btn.getAttribute('data-event-done');
+        var on = !eventIsDone(id);
+        if (on) eventDone[id] = Date.now(); else delete eventDone[id];
+        eventDoneSave();
+        btn.classList.toggle('is-done', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        var box = btn.querySelector('.ed-box');
+        if (box) box.textContent = on ? '✓' : '';
+        updateEventProgress();
+        track('event_done', { event_id: id, done: on });
+        return;
+      }
+      if (e.target.closest('#event-done-reset')) {
+        var now = Date.now();
+        var cleared = 0;
+        EVENTS.forEach(function (ev) {
+          if (eventState(ev, now) === 'ongoing' && eventDone[ev.id]) { delete eventDone[ev.id]; cleared++; }
+        });
+        eventDoneSave();
+        renderEvents();
+        toast(cleared ? '이번 주 완료 기록을 지웠어요' : '지울 기록이 없어요');
+      }
+    });
   }
 
   function updateHero(now) {
@@ -508,6 +656,7 @@
         var elite = (c.fe || c.ce) ? ' <span class="ctag is-elite">ⓔ 엘리트</span>' : '';
         return '<div class="counter-card">' +
           '<span class="counter-rank">' + (i + 1) + '</span>' +
+          monSpriteHTML(c.n, 'counter-sprite', 40) +
           '<div class="counter-info">' +
             '<p class="counter-name">' + c.n +
               ' <span class="ctag ' + (TAG_CLASS[c.tag] || '') + '">' + c.tag + '</span>' + elite + '</p>' +
@@ -528,6 +677,7 @@
       var effClass = p.eff > 1.001 ? '' : ' is-normal';
       return '<div class="counter-card">' +
         '<span class="counter-rank">' + (i + 1) + '</span>' +
+        monSpriteHTML(c.kr, 'counter-sprite', 40) +
         '<div class="counter-info">' +
           '<p class="counter-name">' + c.kr + ' <span style="font-weight:600;color:var(--muted);font-size:11px">' + c.tier + '</span></p>' +
           '<p class="counter-moves"><em>' + c.fast.kr + '</em> / <em>' + c.charged.kr + '</em>' +
@@ -595,6 +745,7 @@
       : '<span class="fineprint">약점 타입을 부스트하는 날씨가 없습니다.</span>';
 
     renderBossCounters(boss);
+    renderRaidCount(boss);
 
     var tipEl = $('#max-tip');
     if (boss.max) {
@@ -870,15 +1021,16 @@
     var q = String(raw || '').trim();
     if (!q) { sug.hidden = true; sug.innerHTML = ''; ivState.list = []; return; }
     dexPrep();
-    ivState.list = DEX.filter(function (p) { return dexMatch(p, q); }).slice(0, 8);
+    ivState.list = dexSearch(q, 8);
     ivState.active = 0;
     if (!ivState.list.length) {
-      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호로 다시 입력해 보세요.</li>';
+      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호(25, 025, #25)로 다시 입력해 보세요.</li>';
       sug.hidden = false;
       return;
     }
     sug.innerHTML = ivState.list.map(function (p, i) {
       return '<li><button class="iv-sug' + (i === ivState.active ? ' is-active' : '') + '" type="button" data-iv-dex="' + p.id + '">' +
+        monSpriteHTML(p.id, 'iv-sug-sprite', 28) +
         '<span class="iv-sug-no">' + dexNo(p.id) + '</span>' +
         '<span class="iv-sug-name">' + p.n + '</span>' +
         '<span class="iv-sug-types">' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + '</span>' +
@@ -896,7 +1048,7 @@
     $('#iv-suggest').hidden = true;
     var picked = $('#iv-picked');
     picked.hidden = false;
-    picked.innerHTML = '<img src="' + dexArt(p.id, false) + '" alt="" width="30" height="30" onerror="this.style.display=\'none\'">' +
+    picked.innerHTML = '<img src="' + dexArt(p.id, false) + '" alt="" width="34" height="34" onerror="this.style.display=\'none\'">' +
       '<b>' + p.n + '</b> <span>' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + ' · 최대 CP ' + num(maxCP(p, CPM50)) + '</span>';
     if (!opts || !opts.silent) track('iv_pick', { pokemon: p.n, dex_id: p.id });
     renderIV();
@@ -1040,6 +1192,7 @@
     if (r.cnt && r.cnt.length) warn.push('주의 카운터 ' + r.cnt.join(', '));
     return '<article class="tier-row">' +
       '<span class="tier-rank' + (r.r <= 3 ? ' is-top' : '') + '">' + r.r + '</span>' +
+      monSpriteHTML(r.n, 'tier-sprite', 44) +
       '<div class="tier-body">' +
         '<p class="tier-name">' + r.n + ' <span class="role-chip">' + r.role + '</span></p>' +
         '<div class="tier-types">' + types + '</div>' +
@@ -1070,6 +1223,14 @@
       tierState.lg = b.getAttribute('data-lg');
       track('tier_league', { league: tierState.lg });
       renderTier();
+      /* 파티 진단도 같은 리그를 보도록 맞춘다 */
+      if (partyState.league !== tierState.lg) {
+        partyState.league = tierState.lg;
+        $$('#party-league .seg').forEach(function (x) {
+          x.classList.toggle('is-active', x.getAttribute('data-party-lg') === tierState.lg);
+        });
+        renderPartyResult();
+      }
     });
     renderTier();
   }
@@ -1099,7 +1260,7 @@
     return out;
   }
 
-  var dexState = { q: '', type: 'all', shinyOnly: false, shown: 0, list: [], ready: false };
+  var dexState = { q: '', type: 'all', shinyOnly: false, ownOnly: false, shown: 0, list: [], ready: false };
   var DEX_CHUNK = 60;
 
   function dexPrep() {
@@ -1111,26 +1272,60 @@
     dexState.ready = true;
   }
 
-  function dexMatch(p, raw) {
+  /* 검색어 → 매칭 점수 (낮을수록 위에 보여 준다)
+     0 도감번호 정확 · 1 도감번호 앞자리 · 2 이름 정확 · 3 이름 앞부분 · 4 영문 정확
+     5 영문 앞부분 · 6 이름 가운데 · 7 영문 가운데 · 8 초성 · -1 불일치
+     도감번호는 25 · 025 · #25 · 0025 · No.25 처럼 써도 같은 번호로 본다. */
+  function dexQueryScore(p, raw) {
     var q = String(raw || '').trim().toLowerCase().replace(/\s+/g, '');
-    if (!q) return true;
-    var numq = q.replace(/^#/, '');
+    if (!q) return 0;
+    var numq = q.replace(/^no\.?/, '').replace(/^#/, '');
     if (/^\d+$/.test(numq)) {
-      numq = numq.replace(/^0+(?=\d)/, '');
-      return String(p.id).indexOf(numq) === 0;
+      var n = parseInt(numq, 10);
+      if (p.id === n) return 0;
+      var idStr = String(p.id);
+      if (idStr.indexOf(numq) === 0 || idStr.indexOf(String(n)) === 0) return 1;
+      return -1;
     }
-    if (p.n.indexOf(q) >= 0 || p._e.indexOf(q) >= 0) return true;
-    /* 초성만 입력한 경우(ㄹㅈㅁ)는 이름 앞에서부터 맞춰 본다 */
-    return /^[ㄱ-ㅎ]+$/.test(q) && p._k.indexOf(q) === 0;
+    if (p.n === q) return 2;
+    if (p.n.indexOf(q) === 0) return 3;
+    if (p._e === q) return 4;
+    if (p._e.indexOf(q) === 0) return 5;
+    if (p.n.indexOf(q) > 0) return 6;
+    if (p._e.indexOf(q) > 0) return 7;
+    if (/^[ㄱ-ㅎ]+$/.test(q) && p._k.indexOf(q) === 0) return 8;
+    return -1;
+  }
+
+  function dexMatch(p, raw) { return dexQueryScore(p, raw) >= 0; }
+
+  /* 검색어로 바로 찾기 — 정확한 번호·이름이 항상 맨 앞에 온다 */
+  function dexSearch(raw, limit) {
+    var q = String(raw || '').trim();
+    if (!q) return [];
+    dexPrep();
+    var hits = [];
+    for (var i = 0; i < DEX.length; i++) {
+      var s = dexQueryScore(DEX[i], q);
+      if (s >= 0) hits.push({ p: DEX[i], s: s, i: i });
+    }
+    hits.sort(function (a, b) { return a.s - b.s || a.i - b.i; });
+    return hits.slice(0, limit || 8).map(function (h) { return h.p; });
   }
 
   function dexFiltered() {
     var q = dexState.q;
-    return DEX.filter(function (p) {
-      if (dexState.type !== 'all' && p.t.indexOf(dexState.type) < 0) return false;
-      if (dexState.shinyOnly && !p.sh) return false;
-      return dexMatch(p, q);
+    var rows = [];
+    DEX.forEach(function (p, i) {
+      if (dexState.type !== 'all' && p.t.indexOf(dexState.type) < 0) return;
+      if (dexState.shinyOnly && !p.sh) return;
+      if (dexState.ownOnly && !shinyOwned(p.id)) return;
+      var s = dexQueryScore(p, q);
+      if (s < 0) return;
+      rows.push({ p: p, s: s, i: i });
     });
+    if (String(q).trim()) rows.sort(function (a, b) { return a.s - b.s || a.i - b.i; });
+    return rows.map(function (r) { return r.p; });
   }
 
   function dexTypeChip(t) {
@@ -1140,9 +1335,10 @@
 
   function dexCardHTML(p) {
     var shiny = dexState.shinyOnly;
-    return '<button class="dex-card" type="button" data-dex="' + p.id + '" aria-label="' + p.n + ' 도감 상세">' +
+    return '<button class="dex-card' + (shinyOwned(p.id) ? ' is-own' : '') + '" type="button" data-dex="' + p.id + '" aria-label="' + p.n + ' 도감 상세">' +
       '<span class="dex-no">' + dexNo(p.id) + '</span>' +
       (p.sh ? '<span class="dex-shiny" title="이로치 출시">✨</span>' : '') +
+      (shinyOwned(p.id) ? '<span class="dex-own-mark" title="내가 가진 이로치">🏅</span>' : '') +
       '<span class="dex-thumb"><img src="' + dexArt(p.id, shiny) + '" alt="" loading="lazy" width="72" height="72" ' +
         (shiny ? 'data-alt-src="' + dexArt(p.id, false) + '" ' : '') +
         'onerror="__spriteFallback(this)||(this.style.visibility=\'hidden\')"></span>' +
@@ -1162,6 +1358,12 @@
 
     $('#dex-grid').innerHTML = slice.map(dexCardHTML).join('');
     $('#dex-empty').hidden = total > 0;
+    $('#dex-empty').textContent = dexState.ownOnly && !total
+      ? '아직 체크한 이로치가 없어요. 포켓몬 상세를 열어 🏅를 눌러 보세요.'
+      : '조건에 맞는 포켓몬이 없어요. 이름·초성·도감번호로 다시 검색해 보세요.';
+    $('#dex-own-count').textContent = shinyCount();
+    $('#dex-own-only').setAttribute('aria-pressed', dexState.ownOnly ? 'true' : 'false');
+    $('#dex-own-only').classList.toggle('is-active', dexState.ownOnly);
     $('#dex-count').innerHTML = total
       ? '<b>' + total.toLocaleString('ko-KR') + '</b>마리' +
         (total > slice.length ? ' · ' + slice.length + '마리 보기' : '')
@@ -1236,6 +1438,13 @@
       '<div class="dex-cp-row">' +
         '<div class="cp-card"><span class="cp-label">최대 CP · Lv.40</span><strong>' + num(maxCP(p, CPM40)) + '</strong></div>' +
         '<div class="cp-card is-max"><span class="cp-label">최대 CP · Lv.50 (XL사탕)</span><strong>' + num(maxCP(p, CPM50)) + '</strong></div>' +
+      '</div>' +
+      '<div class="dex-mine">' +
+        '<button class="dex-own-btn' + (shinyOwned(p.id) ? ' is-on' : '') + '" id="dex-own-toggle" type="button" aria-pressed="' +
+          (shinyOwned(p.id) ? 'true' : 'false') + '">' +
+          (shinyOwned(p.id) ? '🏅 내 이로치로 체크됨' : '🏅 내 이로치로 체크') +
+        '</button>' +
+        '<span class="dex-mine-hint">도감 탭 «🏅 내 이로치»에서 모아볼 수 있어요 · 이 브라우저에만 저장</span>' +
       '</div>' +
       '<div class="dex-mini">' +
         '<div class="dex-mini-item"><span>파트너 사탕 거리</span><strong>' + (p.bd ? p.bd + ' km' : '-') + '</strong></div>' +
@@ -1367,6 +1576,15 @@
       track('dex_filter', { filter_type: 'shiny', filter_value: dexState.shinyOnly ? 'only' : 'all' });
     });
 
+    var ownBtn = $('#dex-own-only');
+    if (ownBtn) ownBtn.addEventListener('click', function () {
+      dexState.ownOnly = !dexState.ownOnly;
+      dexState.shown = DEX_CHUNK;
+      renderDex();
+      track('dex_filter', { filter_type: 'my_shiny', filter_value: dexState.ownOnly ? 'only' : 'all' });
+    });
+    shinySave();
+
     var more = $('#dex-more');
     if (more) more.addEventListener('click', function () {
       dexState.shown += DEX_CHUNK * 2;
@@ -1386,6 +1604,21 @@
       if (e.target === $('#dex-backdrop')) closeDex();
     });
     $('#dex-sheet-body').addEventListener('click', function (e) {
+      var ownToggle = e.target.closest('#dex-own-toggle');
+      if (ownToggle) {
+        var pm = dexSheet.list[dexSheet.idx];
+        if (!pm) return;
+        var next = !shinyOwned(pm.id);
+        shinySet(pm.id, next);
+        ownToggle.classList.toggle('is-on', next);
+        ownToggle.setAttribute('aria-pressed', next ? 'true' : 'false');
+        ownToggle.textContent = next ? '🏅 내 이로치로 체크됨' : '🏅 내 이로치로 체크';
+        renderDex();
+        track('my_shiny_toggle', { pokemon_no: pm.id, pokemon_name: pm.n, owned: next });
+        if (next) toast(pm.n + ' 이로치를 체크했어요');
+        else toast(pm.n + ' 이로치 체크를 해제했어요');
+        return;
+      }
       if (e.target.closest('#dex-shiny-toggle')) {
         dexSheet.shiny = !dexSheet.shiny;
         var p = dexSheet.list[dexSheet.idx];
@@ -1690,19 +1923,25 @@
         '</ul>' +
         '<h3>2. 이용 목적</h3>' +
         '<ul><li>서비스 이용 통계 분석과 화면 개선</li><li>맞춤형 광고 게재 및 광고 성과 측정</li></ul>' +
-        '<h3>3. 쿠키 및 제3자 광고</h3>' +
+        '<h3>3. 브라우저에만 저장되는 정보</h3>' +
+        '<ul>' +
+        '<li>「내 이로치 체크」와 「이벤트 완료 체크」는 이용자 브라우저의 <strong>localStorage</strong>에만 저장되고 서버로 전송되지 않습니다.</li>' +
+        '<li>이 기록은 그 브라우저에만 남기 때문에 다른 기기에서는 보이지 않고, 브라우저 데이터를 지우면 함께 삭제됩니다.</li>' +
+        '<li>「복사」 버튼으로 복사한 검색식은 이용자 클립보드에만 들어가고 사이트가 따로 보관하지 않습니다.</li>' +
+        '</ul>' +
+        '<h3>4. 쿠키 및 제3자 광고</h3>' +
         '<ul>' +
         '<li>Google을 비롯한 제3자 광고 사업자는 쿠키를 사용해 이용자의 이전 방문 기록에 기반한 광고를 게재할 수 있습니다.</li>' +
         '<li>Google의 광고 쿠키 사용으로 이용자는 Google 광고 설정(adssettings.google.com)에서 맞춤 광고를 해제할 수 있습니다.</li>' +
         '<li>브라우저 설정에서 쿠키 저장을 거부할 수 있으며, 이 경우 일부 기능 이용에 제한이 있을 수 있습니다.</li>' +
         '</ul>' +
-        '<h3>4. 보관 및 파기</h3>' +
+        '<h3>5. 보관 및 파기</h3>' +
         '<p>자동 수집 정보는 목적 달성 후 지체 없이 파기하며, 법령에서 정한 기간 동안만 보관합니다.</p>' +
-        '<h3>5. 이용자의 권리</h3>' +
+        '<h3>6. 이용자의 권리</h3>' +
         '<p>이용자는 언제든지 자신의 정보 처리에 관한 열람·정정·삭제를 요청할 수 있습니다.</p>' +
-        '<h3>6. 문의</h3>' +
+        '<h3>7. 문의</h3>' +
         '<p>개인정보 관련 문의는 운영자 이메일 <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a> 또는 하단 <strong>문의</strong> 메뉴로 접수해 주세요.</p>' +
-        '<p style="color:var(--muted)">시행일: 2026년 11월 25일</p>'
+        '<p style="color:var(--muted)">시행일: 2026년 11월 27일</p>'
     },
     terms: {
       title: '이용약관',
@@ -1910,18 +2149,631 @@
     toastTimer = setTimeout(function () { el.style.opacity = '0'; }, 1800);
   }
 
+  /* ─────────────── 인게임 한글 검색식 생성기 ───────────────
+     포켓몬고 한국어 검색창이 실제로 알아듣는 낱말만 쓴다.
+     색이 다른(이로치) · 반짝반짝(럭키) · 전설의 포켓몬 · 환상 · 울트라비스트 · 특별(코스튬)
+     · 즐겨찾기 · #(태그) · @기술(특별한 기술) · 일수0-7 · cp-1500 · 0-1공격 · 3-4방어 · 3-4HP */
+  var SG_EX = [
+    ['star4', '4성(100%)', '!4*'],
+    ['shiny', '색이 다른(이로치)', '!색이 다른'],
+    ['shadow', '그림자', '!그림자'],
+    ['legendary', '전설의 포켓몬', '!전설의 포켓몬'],
+    ['mythical', '환상', '!환상'],
+    ['ultra', '울트라비스트', '!울트라비스트'],
+    ['costume', '코스튬(특별)', '!특별'],
+    ['favorite', '즐겨찾기', '!즐겨찾기'],
+    ['tagged', '태그 있음(#)', '!#'],
+    ['legacy', '특별한 기술(@기술)', '!@기술'],
+    ['lucky', '반짝반짝(럭키)', '!반짝반짝']
+  ];
+
+  function sgBlankEx() {
+    var m = {};
+    SG_EX.forEach(function (x) { m[x[0]] = false; });
+    return m;
+  }
+
+  function sgAllEx() {
+    var m = {};
+    SG_EX.forEach(function (x) { m[x[0]] = true; });
+    return m;
+  }
+
+  var SG_PRESETS = [
+    {
+      id: 'doctor', label: '박사 보내기용',
+      note: '100%·이로치·그림자·전설·환상·울트라비스트·코스튬·즐겨찾기·태그·특별한 기술·럭키를 빼고 남깁니다. 여기 나오는 포켓몬이 보내기 후보예요.',
+      state: { ex: sgAllEx(), grade: '', days: '', iv: '', cp: '' }
+    },
+    {
+      id: 'pvp', label: '배틀리그 0공격',
+      note: '공격은 낮고 방어·HP가 높은 배틀리그형 개체를 찾습니다. CP를 같이 고르면 슈퍼·하이퍼리그 상한 안에 있는 것만 남아요.',
+      state: { ex: sgBlankEx(), grade: '', days: '', iv: '0-1공격&3-4방어&3-4HP', cp: '' }
+    },
+    {
+      id: 'cd', label: '커뮤니티데이 정리',
+      note: '오늘 잡은 포켓몬 중에서 100%·이로치·그림자·코스튬·즐겨찾기·태그를 뺀 나머지만 보여 줍니다. 커뮤니티데이 마무리에 쓰세요.',
+      state: { ex: (function () { var m = sgBlankEx(); m.star4 = 1; m.shiny = 1; m.shadow = 1; m.costume = 1; m.favorite = 1; m.tagged = 1; return m; })(), grade: '', days: '일수0', iv: '', cp: '' }
+    },
+    {
+      id: 'week', label: '최근 7일 잉여 정리',
+      note: '일주일 동안 잡은 것 중에서 남길 만한 개체를 빼고 보여 줍니다. 대량 보내기 전에 한 번 더 확인하세요.',
+      state: { ex: (function () { var m = sgBlankEx(); m.star4 = 1; m.shiny = 1; m.shadow = 1; m.legendary = 1; m.mythical = 1; m.favorite = 1; m.tagged = 1; return m; })(), grade: '', days: '일수0-7', iv: '', cp: '' }
+    },
+    {
+      id: 'shiny', label: '이로치만 모아보기',
+      note: '가지고 있는 이로치를 한 번에 보여 줍니다. 이로치 체크는 이 사이트 «도감 → 🏅 내 이로치»에 저장해 두세요.',
+      state: { ex: sgBlankEx(), grade: '', days: '', iv: '', cp: '' , only: '색이 다른' }
+    },
+    {
+      id: 'lucky', label: '럭키 교환 후보',
+      note: '반짝반짝(럭키) 포켓몬 중 3~4성만 보여 줍니다. 교환으로 개체값을 올릴 후보를 고를 때 쓰세요.',
+      state: { ex: sgBlankEx(), grade: '3*,4*', days: '', iv: '', cp: '', only: '반짝반짝' }
+    },
+    {
+      id: 'evolve', label: '도감 신규 진화',
+      note: '지금 진화할 수 있고, 진화한 모습이 아직 도감에 없는 포켓몬만 보여 줍니다. 도감 채울 때 좋아요.',
+      state: { ex: sgBlankEx(), grade: '', days: '', iv: '', cp: '', only: '진화&미등록' }
+    }
+  ];
+
+  var sgState = { id: 'doctor', ex: sgAllEx(), grade: '', days: '', iv: '', cp: '', only: '' };
+
+  function sgApplyPreset(p) {
+    sgState.id = p.id;
+    sgState.ex = {};
+    SG_EX.forEach(function (x) { sgState.ex[x[0]] = !!p.state.ex[x[0]]; });
+    sgState.grade = p.state.grade || '';
+    sgState.days = p.state.days || '';
+    sgState.iv = p.state.iv || '';
+    sgState.cp = p.state.cp || '';
+    sgState.only = p.state.only || '';
+  }
+
+  function sgBuild() {
+    var parts = [];
+    if (sgState.only) parts.push(sgState.only);
+    if (sgState.grade) parts.push(sgState.grade);
+    if (sgState.days) parts.push(sgState.days);
+    if (sgState.iv) parts.push(sgState.iv);
+    if (sgState.cp) parts.push(sgState.cp);
+    SG_EX.forEach(function (x) { if (sgState.ex[x[0]]) parts.push(x[2]); });
+    return parts.join('&');
+  }
+
+  function sgNote() {
+    for (var i = 0; i < SG_PRESETS.length; i++) {
+      if (SG_PRESETS[i].id === sgState.id) return SG_PRESETS[i].note;
+    }
+    return '게임 검색창에 붙여넣으면 조건에 맞는 포켓몬만 남아요.';
+  }
+
+  function renderSg() {
+    var codeEl = $('#sg-code'), noteEl = $('#sg-note');
+    if (!codeEl) return;
+    var code = sgBuild();
+    codeEl.textContent = code || '조건을 하나 이상 골라 주세요';
+    noteEl.textContent = sgNote();
+    $$('#sg-presets .sg-preset').forEach(function (b) {
+      var on = b.getAttribute('data-preset') === sgState.id;
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    $$('#sg-exclude .sg-chip').forEach(function (b) {
+      var on = !!sgState.ex[b.getAttribute('data-ex')];
+      b.classList.toggle('is-active', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    var g = $('#sg-grade'), d = $('#sg-days'), iv = $('#sg-iv'), cp = $('#sg-cp');
+    if (g) g.value = sgState.grade;
+    if (d) d.value = sgState.days;
+    if (iv) iv.value = sgState.iv;
+    if (cp) cp.value = sgState.cp;
+  }
+
+  /* 클립보드 복사 — https가 아니거나 권한이 막혀도 되도록 예비 방법을 둔다 */
+  function copyPlainText(text, okMsg) {
+    if (!text) { toast('만들 검색식이 없어요'); return; }
+    var done = function () { toast(okMsg || '복사했어요'); };
+    var legacy = function () {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:0;left:-9999px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+      document.body.removeChild(ta);
+      if (ok) done(); else toast('검색식이 길어요. 아래 코드를 길게 눌러 복사해 주세요');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(legacy);
+    } else legacy();
+  }
+
+  function initSearchGen() {
+    var presets = $('#sg-presets');
+    var exclude = $('#sg-exclude');
+    if (!presets || !exclude) return;
+
+    presets.innerHTML = SG_PRESETS.map(function (p) {
+      return '<button class="sg-preset' + (p.id === sgState.id ? ' is-active' : '') + '" type="button" data-preset="' + p.id +
+        '" aria-pressed="' + (p.id === sgState.id ? 'true' : 'false') + '">' + p.label + '</button>';
+    }).join('');
+
+    exclude.innerHTML = SG_EX.map(function (x) {
+      return '<button class="sg-chip" type="button" data-ex="' + x[0] + '" aria-pressed="false">' + x[1] + '</button>';
+    }).join('');
+
+    presets.addEventListener('click', function (e) {
+      var b = e.target.closest('.sg-preset');
+      if (!b) return;
+      var id = b.getAttribute('data-preset');
+      var p = SG_PRESETS.filter(function (x) { return x.id === id; })[0];
+      if (!p) return;
+      sgApplyPreset(p);
+      renderSg();
+      track('searchgen_preset', { preset: id });
+    });
+
+    exclude.addEventListener('click', function (e) {
+      var b = e.target.closest('.sg-chip');
+      if (!b) return;
+      var k = b.getAttribute('data-ex');
+      sgState.ex[k] = !sgState.ex[k];
+      sgState.id = '';
+      renderSg();
+    });
+
+    [['#sg-grade', 'grade'], ['#sg-days', 'days'], ['#sg-iv', 'iv'], ['#sg-cp', 'cp']].forEach(function (cfg) {
+      var el = $(cfg[0]);
+      if (!el) return;
+      el.addEventListener('change', function () {
+        sgState[cfg[1]] = el.value;
+        sgState.id = '';
+        renderSg();
+      });
+    });
+
+    var copy = $('#sg-copy');
+    if (copy) copy.addEventListener('click', function () {
+      copyPlainText(sgBuild(), '검색식을 복사했어요. 게임 검색창에 붙여넣으세요');
+      track('searchgen_copy', { preset: sgState.id || 'custom' });
+    });
+
+    renderSg();
+  }
+
+  /* ─────────────── 내 배틀 파티 3마리 약점 진단 ─────────────── */
+  var partyState = { league: '1500', mons: [null, null, null], lists: [[], [], []], active: [-1, -1, -1] };
+
+  function partySlotHTML(i) {
+    return '<div class="party-slot" data-slot="' + i + '">' +
+      '<span class="ps-no">' + (i + 1) + '</span>' +
+      '<div class="iv-search ps-search">' +
+        '<label class="iv-search-box" for="party-q-' + i + '">' +
+          '<span class="iv-search-icon" aria-hidden="true">🔍</span>' +
+          '<input type="search" id="party-q-' + i + '" class="iv-input" autocomplete="off" spellcheck="false"' +
+            ' placeholder="' + (i === 0 ? '이름 · 초성 · 도감번호 (예: 마릴, 184)' : '포켓몬 ' + (i + 1) + ' (선택)') + '"' +
+            ' aria-label="파티 ' + (i + 1) + '번째 포켓몬 검색">' +
+        '</label>' +
+        '<ul class="iv-suggest" id="party-sug-' + i + '" hidden></ul>' +
+      '</div>' +
+      '<div class="ps-picked" id="party-pick-' + i + '" hidden></div>' +
+    '</div>';
+  }
+
+  function renderPartySlots() {
+    var wrap = $('#party-slots');
+    if (!wrap) return;
+    wrap.innerHTML = [0, 1, 2].map(partySlotHTML).join('');
+    [0, 1, 2].forEach(renderPartyPicked);
+  }
+
+  function renderPartyPicked(i) {
+    var box = $('#party-pick-' + i);
+    var input = $('#party-q-' + i);
+    if (!box) return;
+    var search = input && input.closest('.ps-search') ? input.closest('.ps-search') : null;
+    var p = partyState.mons[i];
+    if (!p) {
+      box.hidden = true;
+      box.innerHTML = '';
+      if (search) search.hidden = false;
+      if (input) input.hidden = false;
+      return;
+    }
+    if (search) search.hidden = true;
+    box.hidden = false;
+    box.innerHTML = monSpriteHTML(p.id, 'ps-sprite', 40) +
+      '<span class="ps-name">' + p.n + '</span>' +
+      '<span class="ps-types">' + p.t.map(function (t) {
+        return '<span class="type-chip" style="background:' + PGO.typeColor(t) + ';color:' + PGO.typeText(t) + '">' + PGO.typeKo(t) + '</span>';
+      }).join('') + '</span>' +
+      '<button class="ps-clear" type="button" data-party-clear="' + i + '" aria-label="' + p.n + ' 빼기">✕</button>';
+  }
+
+  function partySuggest(i, raw) {
+    var sug = $('#party-sug-' + i);
+    if (!sug) return;
+    var q = String(raw || '').trim();
+    if (!q) { sug.hidden = true; sug.innerHTML = ''; partyState.lists[i] = []; return; }
+    partyState.lists[i] = dexSearch(q, 8);
+    partyState.active[i] = 0;
+    if (!partyState.lists[i].length) {
+      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호로 다시 입력해 보세요.</li>';
+      sug.hidden = false;
+      return;
+    }
+    sug.innerHTML = partyState.lists[i].map(function (p, idx) {
+      return '<li><button class="iv-sug' + (idx === 0 ? ' is-active' : '') + '" type="button" data-party-pick="' + i + '" data-party-dex="' + p.id + '">' +
+        monSpriteHTML(p.id, 'iv-sug-sprite', 28) +
+        '<span class="iv-sug-no">' + dexNo(p.id) + '</span>' +
+        '<span class="iv-sug-name">' + p.n + '</span>' +
+        '<span class="iv-sug-types">' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + '</span>' +
+      '</button></li>';
+    }).join('');
+    sug.hidden = false;
+  }
+
+  function partyPick(i, id) {
+    var p = DEX.filter(function (x) { return x.id === Number(id); })[0];
+    if (!p) return;
+    partyState.mons[i] = p;
+    partyState.active[i] = -1;
+    var q = $('#party-q-' + i);
+    var sug = $('#party-sug-' + i);
+    if (q) { q.value = p.n; q.hidden = true; }
+    if (sug) { sug.hidden = true; sug.innerHTML = ''; }
+    renderPartyPicked(i);
+    renderPartyResult();
+    track('party_pick', { slot: i + 1, pokemon: p.n, dex_id: p.id, league: partyState.league });
+  }
+
+  function partyClear(i) {
+    partyState.mons[i] = null;
+    var input = $('#party-q-' + i);
+    if (input) { input.value = ''; input.hidden = false; }
+    renderPartyPicked(i);
+    renderPartyResult();
+  }
+
+  function partyAnalyze(mons) {
+    var def = {};
+    PGO.TYPES.forEach(function (t) { def[t.id] = { id: t.id, ko: t.ko, count: 0, max: 0, who: [] }; });
+    mons.forEach(function (m) {
+      PGO.defenseTable(m.t).forEach(function (r) {
+        if (r.mult > 1.001) {
+          var d = def[r.type];
+          d.count++;
+          if (r.mult > d.max) d.max = r.mult;
+          d.who.push(m.n);
+        }
+      });
+    });
+    var need = mons.length >= 2 ? 2 : 1;
+    var weak = Object.keys(def).map(function (k) { return def[k]; })
+      .filter(function (d) { return d.count >= need; })
+      .sort(function (a, b) { return b.count - a.count || b.max - a.max; });
+
+    var covered = {};
+    mons.forEach(function (m) {
+      m.t.forEach(function (at) {
+        PGO.TYPES.forEach(function (dt) { if (PGO.single(at, dt.id) > 1.001) covered[dt.id] = 1; });
+      });
+    });
+    var uncovered = PGO.TYPES.filter(function (t) { return !covered[t.id]; });
+
+    var tier = PVP_TIER[partyState.league] || [];
+    var threats = [];
+    var mine = {};
+    mons.forEach(function (m) { mine[m.n] = 1; });
+    tier.forEach(function (r) {
+      if (mine[r.n]) return;
+      var ourBest = 0;
+      mons.forEach(function (m) {
+        m.t.forEach(function (at) { if (PGO.multi(at, r.t) > ourBest) ourBest = PGO.multi(at, r.t); });
+      });
+      var hits = 0, theirBest = 0;
+      r.t.forEach(function (tt) {
+        var best = 0;
+        mons.forEach(function (m) { if (PGO.multi(tt, m.t) > best) best = PGO.multi(tt, m.t); });
+        if (best > 1.001) { hits++; if (best > theirBest) theirBest = best; }
+      });
+      var score = (ourBest < 1.6 ? 2 : 0) + hits + (theirBest > 2.5 ? 1 : 0);
+      if (score >= 3) threats.push({ r: r, ourBest: ourBest, hits: hits, theirBest: theirBest, score: score });
+    });
+    threats.sort(function (a, b) { return b.score - a.score || a.r.r - b.r.r; });
+
+    return { weak: weak, uncovered: uncovered, threats: threats.slice(0, 4), coveredCount: 18 - uncovered.length };
+  }
+
+  function renderPartyResult() {
+    var box = $('#party-result');
+    if (!box) return;
+    var mons = partyState.mons.filter(Boolean);
+    if (!mons.length) {
+      box.innerHTML = '<p class="iv-empty">3마리를 넣으면 약점 타입·못 찌르는 타입·주의할 상대를 진단해 드려요.</p>';
+      return;
+    }
+    var a = partyAnalyze(mons);
+
+    var weakHTML = a.weak.length ? a.weak.map(function (d) {
+      return '<span class="party-chip is-weak">' +
+        '<span class="type-chip" style="background:' + PGO.typeColor(d.id) + ';color:' + PGO.typeText(d.id) + '">' + d.ko + '</span>' +
+        '<b>' + d.count + '/' + mons.length + '마리</b></span>';
+    }).join('') : '<span class="party-none">2마리 이상 같이 약한 타입은 없어요.</span>';
+
+    var uncHTML = a.uncovered.length ? a.uncovered.map(function (t) {
+      return '<span class="type-chip" style="background:' + PGO.typeColor(t.id) + ';color:' + PGO.typeText(t.id) + '">' + PGO.typeKo(t.id) + '</span>';
+    }).join('') : '<span class="party-none">18개 타입을 모두 1.6배로 찌를 수 있어요.</span>';
+
+    var threatHTML = a.threats.length ? a.threats.map(function (t) {
+      var reasons = [];
+      if (t.ourBest < 1.6) reasons.push('1.6배로 못 찌름');
+      if (t.hits) reasons.push('우리 ' + t.hits + '마리에 약점');
+      if (t.theirBest > 2.5) reasons.push('우리 쪽에 2.56배');
+      return '<div class="threat-row">' +
+        monSpriteHTML(t.r.n, 'threat-sprite', 36) +
+        '<div class="threat-body">' +
+          '<p class="threat-name">' + t.r.n + ' <span class="role-chip">' + t.r.role + '</span></p>' +
+          '<p class="threat-reason">' + reasons.join(' · ') + '</p>' +
+        '</div>' +
+        '<span class="threat-types">' + t.r.t.map(function (tt) {
+          return '<span class="type-chip" style="background:' + PGO.typeColor(tt) + ';color:' + PGO.typeText(tt) + '">' + PGO.typeKo(tt) + '</span>';
+        }).join('') + '</span>' +
+      '</div>';
+    }).join('') : '<p class="party-none">이 리그 TOP 30에서는 눈에 띄는 위협이 없어요.</p>';
+
+    var summary = '이 조합은 ' +
+      (a.weak.length ? '<b>' + a.weak.slice(0, 3).map(function (d) { return d.ko; }).join('·') + '</b>에 약하고, ' : '') +
+      (a.uncovered.length ? '<b>' + a.uncovered.length + '개 타입</b>을 못 찌릅니다.' : '18개 타입을 모두 찌를 수 있습니다.');
+
+    box.innerHTML = '<p class="party-summary">' + summary + (mons.length < 3 ? ' <span class="party-tip">(' + (3 - mons.length) + '마리 더 넣으면 더 정확해져요)</span>' : '') + '</p>' +
+      '<div class="party-block"><h4 class="party-h">방어 약점 — 두 마리 이상 같이 약한 타입</h4><div class="party-chips">' + weakHTML + '</div></div>' +
+      '<div class="party-block"><h4 class="party-h">공격 커버리지 — 자속으로 못 찌르는 타입 (' + (18 - a.coveredCount) + '개)</h4><div class="party-chips">' + uncHTML + '</div></div>' +
+      '<div class="party-block"><h4 class="party-h">주의할 상위 메타</h4><div class="threat-list">' + threatHTML + '</div></div>';
+  }
+
+  function initParty() {
+    var wrap = $('#party-slots');
+    if (!wrap) return;
+    renderPartySlots();
+
+    var league = $('#party-league');
+    if (league) league.addEventListener('click', function (e) {
+      var b = e.target.closest('.seg');
+      if (!b) return;
+      $$('.seg', league).forEach(function (x) { x.classList.remove('is-active'); });
+      b.classList.add('is-active');
+      partyState.league = b.getAttribute('data-party-lg');
+      renderPartyResult();
+      track('party_league', { league: partyState.league });
+      /* 티어 목록도 같은 리그로 바꿔 두면 두 목록이 엇갈리지 않는다 */
+      if (tierState.lg !== partyState.league) {
+        tierState.lg = partyState.league;
+        $$('#tier-league .seg').forEach(function (x) {
+          x.classList.toggle('is-active', x.getAttribute('data-lg') === tierState.lg);
+        });
+        renderTier();
+      }
+    });
+
+    wrap.addEventListener('input', function (e) {
+      var input = e.target.closest('.iv-input');
+      if (!input) return;
+      var i = Number(input.id.replace('party-q-', ''));
+      partySuggest(i, input.value);
+    });
+
+    wrap.addEventListener('keydown', function (e) {
+      var input = e.target.closest('.iv-input');
+      if (!input) return;
+      var i = Number(input.id.replace('party-q-', ''));
+      var list = partyState.lists[i] || [];
+      if (e.key === 'Enter') {
+        if (!list.length) return;
+        e.preventDefault();
+        partyPick(i, (list[partyState.active[i] >= 0 ? partyState.active[i] : 0] || list[0]).id);
+      } else if (e.key === 'Escape') {
+        var sug = $('#party-sug-' + i);
+        if (sug) sug.hidden = true;
+      } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (!list.length) return;
+        e.preventDefault();
+        var n = list.length;
+        partyState.active[i] = ((partyState.active[i] + (e.key === 'ArrowDown' ? 1 : -1)) + n) % n;
+        $$('#party-sug-' + i + ' .iv-sug').forEach(function (b, idx) {
+          b.classList.toggle('is-active', idx === partyState.active[i]);
+        });
+      }
+    });
+
+    wrap.addEventListener('click', function (e) {
+      var pick = e.target.closest('[data-party-dex]');
+      if (pick) {
+        partyPick(Number(pick.getAttribute('data-party-pick')), Number(pick.getAttribute('data-party-dex')));
+        return;
+      }
+      var clear = e.target.closest('[data-party-clear]');
+      if (clear) partyClear(Number(clear.getAttribute('data-party-clear')));
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.party-slot')) {
+        [0, 1, 2].forEach(function (i) {
+          var sug = $('#party-sug-' + i);
+          if (sug) sug.hidden = true;
+        });
+      }
+    });
+
+    renderPartyResult();
+  }
+
+  /* ─────────────── 레이드 인원별 클리어 계산 ───────────────
+     data/raid-counters.js 의 DPS 는 40레벨·개체값 15·보스 방어 CPM 0.79 기준 사이클 DPS 라서
+     트레이너 레벨은 CPM 비율로, 그림자 레이드의 방어 CPM 0.82 는 배율로 보정한다.
+     한 사람이 TOP 6 을 순서대로 쓰는 것으로 보고 6마리 평균 DPS 를 쓴다(리로비 때 다시 같은 6마리). */
+  var rcState = { people: 3, level: 40, weather: 0, friend: 'none' };
+  var RC_EFFICIENCY = 0.8;   /* 교체·리로비·회피 손실 실전 보정 */
+  var RC_TIME_LIMIT = 300;
+
+  function rcBossInfo(boss) {
+    var tier = boss.tier || '';
+    var hp = 15000, defCpm = 0.79, shield = false;
+    if (/슈퍼 메가/.test(tier)) { hp = 22500; shield = true; }
+    else if (/메가/.test(tier) || /^메가/.test(boss.kr || '')) hp = 9000;
+    if (/그림자/.test(tier)) defCpm = 0.82;
+    return { hp: hp, defCpm: defCpm, shield: shield, limit: RC_TIME_LIMIT };
+  }
+
+  function rcCompute(boss) {
+    if (!boss) return null;
+    if (boss.max) return { max: true };
+    var rows = RAID_TOP[boss.id] || [];
+    if (!rows.length) return null;
+    var info = rcBossInfo(boss);
+    var weakTypes = PGO.weaknesses(boss.types).map(function (w) { return w.type; });
+    var boostTypes = {};
+    PGO.weatherFor(weakTypes).forEach(function (w) {
+      w.types.forEach(function (t) { boostTypes[t] = 1; });
+    });
+    var levelCpm = CPM_TABLE[rcState.level] || CPM_TABLE[40] || 0.7903001;
+    var levelF = levelCpm / 0.7903001;
+    var defF = 0.7903001 / info.defCpm;
+    var friendF = rcState.friend === 'best' ? 1.10 : rcState.friend === 'ultra' ? 1.07 : 1;
+    var sum = 0, boostedCount = 0;
+    rows.forEach(function (r) {
+      var boosted = !!rcState.weather && (r.t || []).some(function (t) { return boostTypes[t]; });
+      if (boosted) boostedCount++;
+      sum += r.dps * (boosted ? 1.2 : 1);
+    });
+    var perTrainer = (sum / rows.length) * levelF * defF;
+    var table = [];
+    for (var n = 1; n <= 6; n++) {
+      var dps = perTrainer * friendF * n * RC_EFFICIENCY;
+      var t = dps > 0 ? info.hp / dps : Infinity;
+      table.push({ n: n, t: t, ok: t <= info.limit });
+    }
+    return {
+      info: info, table: table, perTrainer: perTrainer, friendF: friendF,
+      meanDps: sum / rows.length, boostedCount: boostedCount, count: rows.length
+    };
+  }
+
+  function rcTimeText(t) {
+    if (!isFinite(t) || t <= 0) return '—';
+    if (t > 900) return '15분 이상';
+    var m = Math.floor(t / 60), s = Math.round(t % 60);
+    if (s === 60) { m++; s = 0; }
+    return m > 0 ? m + '분 ' + (s < 10 ? '0' : '') + s + '초' : s + '초';
+  }
+
+  function rcVerdict(t, limit) {
+    if (!isFinite(t)) return { cls: 'is-no', label: '계산 불가' };
+    var r = t / limit;
+    if (r > 1) return { cls: 'is-no', label: '시간 초과' };
+    if (r <= 0.5) return { cls: 'is-easy', label: '아주 여유' };
+    if (r <= 0.7) return { cls: 'is-easy', label: '여유' };
+    if (r <= 0.85) return { cls: 'is-ok', label: '적당' };
+    if (r <= 0.95) return { cls: 'is-tight', label: '빡빡함' };
+    return { cls: 'is-tight', label: '아슬아슬' };
+  }
+
+  function renderRaidCount(boss) {
+    var box = $('#raid-count');
+    if (!box) return;
+    var verdictEl = $('#rc-verdict'), tableEl = $('#rc-table'), noteEl = $('#rc-note');
+    if (!verdictEl || !tableEl || !noteEl) return;
+    var res = rcCompute(boss);
+
+    if (!res) {
+      verdictEl.innerHTML = '<p class="rc-empty">이 보스는 카운터 DPS 데이터가 없어 인원 계산을 할 수 없어요. 위 TOP 6 목록을 참고하세요.</p>';
+      tableEl.innerHTML = '';
+      noteEl.textContent = '';
+      return;
+    }
+    if (res.max) {
+      verdictEl.innerHTML = '<p class="rc-empty">맥스배틀은 일반 레이드와 계산이 달라요. 같은 타입 맥스무브를 가진 다이맥스 3마리를 준비하는 쪽이 먼저입니다.</p>';
+      tableEl.innerHTML = '';
+      noteEl.textContent = '';
+      return;
+    }
+
+    var sel = res.table[rcState.people - 1] || res.table[0];
+    var v = rcVerdict(sel.t, res.info.limit);
+    var firstOk = null, safeOk = null;
+    res.table.forEach(function (row) {
+      if (row.ok && firstOk === null) firstOk = row.n;
+      if (row.t <= res.info.limit * 0.7 && safeOk === null) safeOk = row.n;
+    });
+
+    var line;
+    if (!firstOk) {
+      line = '이 조건에서는 6명으로도 시간이 모자라요. 레벨·날씨·프렌드 보너스를 올려 보세요.';
+    } else if (safeOk) {
+      line = '<b>' + firstOk + '명</b>부터 가능하고, <b>' + safeOk + '명</b>이면 여유 있게 깹니다.';
+    } else {
+      line = '<b>' + firstOk + '명</b>부터 가능하지만 시간이 꽤 빠듯해요. 한 명 더 모으면 안정적입니다.';
+    }
+
+    verdictEl.innerHTML =
+      '<div class="rc-head">' +
+        '<div class="rc-big">' +
+          '<span class="rc-people">' + rcState.people + '명</span>' +
+          '<strong class="rc-time">' + rcTimeText(sel.t) + '</strong>' +
+          '<span class="rc-badge ' + v.cls + '">' + v.label + '</span>' +
+        '</div>' +
+        '<p class="rc-line">' + line + ' <span class="rc-limit">(제한 시간 ' + res.info.limit + '초)</span></p>' +
+      '</div>';
+
+    tableEl.innerHTML = '<div class="rc-rows">' + res.table.map(function (row) {
+      var vv = rcVerdict(row.t, res.info.limit);
+      return '<div class="rc-row' + (row.n === rcState.people ? ' is-sel' : '') + '">' +
+        '<span class="rc-n">' + row.n + '명</span>' +
+        '<span class="rc-t">' + rcTimeText(row.t) + '</span>' +
+        '<span class="rc-v ' + vv.cls + '">' + vv.label + '</span>' +
+      '</div>';
+    }).join('') + '</div>';
+
+    noteEl.textContent = '보스 HP ' + num(res.info.hp) + ' · 제한 시간 ' + res.info.limit + '초 기준입니다. TOP 6 카운터 6마리를 모두 보유했다고 보고 ' +
+      '평균 ' + res.meanDps.toFixed(1) + ' DPS(레벨 40·개체값 15)를 바탕으로 레벨·날씨·프렌드 보너스를 반영했습니다' +
+      (rcState.weather ? ' (날씨 부스트 해당 카운터 ' + res.boostedCount + '/' + res.count + '마리)' : '') +
+      '. 교체·리로비·회피 손실 20%를 빼서 계산한 추정값이라, 실제 클리어는 파티와 플레이에 따라 달라집니다' +
+      (res.info.shield ? '. 슈퍼 메가 레이드는 방패를 깨는 메가진화가 있어야 해서 더 오래 걸릴 수 있어요.' : '.');
+  }
+
+  function initRaidCount() {
+    var people = $('#rc-people'), level = $('#rc-level'), weather = $('#rc-weather'), friend = $('#rc-friend');
+    if (!people) return;
+    function refresh() {
+      var boss = BOSSES.filter(function (b) { return b.id === activeBossId; })[0] || null;
+      renderRaidCount(boss);
+    }
+    people.addEventListener('change', function () { rcState.people = Number(people.value) || 1; refresh(); track('raid_count_people', { people: rcState.people }); });
+    level.addEventListener('change', function () { rcState.level = Number(level.value) || 40; refresh(); track('raid_count_level', { level: rcState.level }); });
+    weather.addEventListener('change', function () { rcState.weather = Number(weather.value) || 0; refresh(); });
+    friend.addEventListener('change', function () { rcState.friend = friend.value; refresh(); });
+  }
+
   /* ─────────────── 시작 ─────────────── */
   function boot() {
     tickClock();
     initTabs();
     initBrand();
     initFilterChips();
+    initEventChecks();
     initBossGrid();
+    initRaidCount();
     initTypeCalc();
     initPowerUp();
     initIV();
     initTier();
+    initParty();
     initDex();
+    initSearchGen();
     initModals();
     initShare();
     renderPromoBanners();
@@ -2015,6 +2867,15 @@
     guideState: guideState,
     maxCP: function (id) { var p = DEX.filter(function (x) { return x.id === id; })[0]; return p ? { lv40: maxCP(p, CPM40), lv50: maxCP(p, CPM50) } : null; },
     openDex: openDex,
-    closeDex: closeDex
+    closeDex: closeDex,
+    dexSearch: dexSearch,
+    dexQueryScore: dexQueryScore,
+    dexState: dexState,
+    searchGen: { build: sgBuild, state: sgState, presets: SG_PRESETS },
+    party: { state: partyState, pick: partyPick, clear: partyClear, analyze: partyAnalyze, result: renderPartyResult },
+    raidCount: { state: rcState, compute: rcCompute, render: renderRaidCount },
+    myShiny: { owned: shinyOwned, set: shinySet, count: shinyCount },
+    eventDone: { is: eventIsDone },
+    dexIdOfName: dexIdOfName
   };
 })();

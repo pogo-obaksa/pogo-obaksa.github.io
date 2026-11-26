@@ -1282,3 +1282,205 @@ a.guide-card{color:inherit;font-family:var(--font);}
   border:1px solid var(--line-strong);font-size:12px;font-weight:800;color:var(--text-dim);text-decoration:none;
 }
 .nojs-guides a:hover{border-color:#7DD3FC;color:var(--sky-deep);}
+
+/* ═══════════════════════════════════════════════════════════
+   포켓몬 아이콘 — 티어·카운터·파티·검색 목록의 작은 스프라이트
+   (도감 카드·보스 카드와 같은 CDN 이미지를 36~44px로)
+   ═══════════════════════════════════════════════════════════ */
+[hidden]{display:none!important;}
+.mon-sprite{
+  width:40px;height:40px;flex:0 0 auto;object-fit:contain;
+  image-rendering:pixelated;
+  filter:drop-shadow(0 1px 1px rgba(15,23,42,.12));
+}
+.mon-sprite.is-empty{
+  display:inline-block;border-radius:10px;background:var(--panel-3);
+  border:1px dashed var(--line-strong);
+}
+.counter-card{grid-template-columns:30px 40px minmax(0,1fr) auto;}
+.counter-sprite{width:40px;height:40px;}
+.tier-row{grid-template-columns:34px 44px minmax(0,1fr);align-items:start;}
+.tier-sprite{width:44px;height:44px;margin-top:1px;}
+.iv-sug-sprite{width:28px;height:28px;}
+
+/* ═══════════ 인게임 한글 검색식 생성기 ═══════════ */
+.sg-presets{
+  display:flex;flex-wrap:nowrap;gap:6px;margin:13px 0 11px;padding-bottom:2px;
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+}
+.sg-presets::-webkit-scrollbar{display:none;}
+.sg-preset{
+  flex:0 0 auto;
+  padding:7px 12px;border-radius:999px;font-size:12.5px;font-weight:800;
+  background:#FFFFFF;border:1px solid var(--line-strong);color:var(--text-dim);
+  box-shadow:0 2px 0 rgba(15,23,42,.04);
+}
+.sg-preset:hover{border-color:#7DD3FC;color:var(--sky-deep);}
+.sg-preset.is-active{
+  background:linear-gradient(180deg,#2563EB,#1D4ED8);border-color:#1D4ED8;color:#fff;
+  box-shadow:0 4px 12px rgba(29,78,216,.22);
+}
+.sg-out{display:flex;align-items:stretch;gap:8px;margin-bottom:8px;}
+.sg-code{
+  flex:1 1 auto;min-width:0;display:block;padding:13px 14px;border-radius:13px;
+  background:#0F172A;color:#7DD3FC;border:1px solid #1E293B;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12.5px;font-weight:700;line-height:1.65;word-break:break-all;letter-spacing:0;
+  -webkit-user-select:all;user-select:all;
+}
+.sg-copy{
+  flex:0 0 auto;min-width:74px;padding:0 16px;border-radius:13px;
+  background:linear-gradient(180deg,#2563EB,#1D4ED8);color:#fff;border:1px solid #1D4ED8;
+  font-size:13.5px;font-weight:800;box-shadow:0 4px 12px rgba(29,78,216,.24);
+}
+.sg-copy:active{transform:translateY(1px);}
+.sg-note{font-size:12.5px;color:var(--muted);font-weight:600;margin:0 0 2px;word-break:keep-all;line-height:1.6;}
+.sg-detail{margin-top:6px;}
+.sg-block{margin:12px 0 2px;}
+.sg-h{font-size:12px;color:#0369A1;font-weight:800;letter-spacing:.04em;margin:0 0 8px;}
+.sg-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.sg-chip{
+  font-size:12px;font-weight:700;padding:6px 10px;border-radius:9px;
+  background:#FFFFFF;border:1px solid var(--line-strong);color:var(--text-dim);
+}
+.sg-chip:hover{border-color:#FDA4AF;color:#BE123C;background:#FFF7F8;}
+.sg-chip.is-active{background:#FFF1F2;border-color:#FDA4AF;color:#BE123C;font-weight:800;}
+.sg-chip.is-active::before{content:"✓ ";font-weight:800;}
+.sg-selects{display:grid;gap:10px;margin:14px 0 6px;}
+@media(min-width:620px){ .sg-selects{grid-template-columns:1fr 1fr;} }
+.sg-fine{margin-top:12px;}
+
+/* ═══════════ 내 배틀 파티 약점 진단 ═══════════ */
+.party-slots{display:grid;gap:10px;margin:8px 0 14px;}
+.party-slot{
+  display:grid;grid-template-columns:30px minmax(0,1fr);gap:8px;align-items:start;
+  padding:10px;border-radius:14px;background:#FBFDFF;border:1px solid #E6ECF3;
+}
+.ps-no{
+  width:28px;height:28px;border-radius:9px;display:grid;place-items:center;
+  background:var(--panel-3);color:var(--text-dim);font-size:12.5px;font-weight:800;
+}
+.party-slot .iv-search{margin:0;min-width:0;}
+.ps-picked{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:6px 8px 6px 5px;border-radius:11px;background:#FFFFFF;border:1px solid #E2F0FA;
+}
+.ps-name{font-size:13.5px;font-weight:800;color:#0F172A;}
+.ps-types{display:flex;gap:4px;flex-wrap:wrap;}
+.ps-types .type-chip{font-size:10.5px;padding:2px 8px;box-shadow:inset 0 -1px 0 rgba(0,0,0,.12);}
+.ps-clear{
+  margin-left:auto;width:26px;height:26px;border-radius:8px;
+  border:1px solid var(--line);background:#FFFFFF;color:var(--muted);font-size:12px;font-weight:800;
+}
+.ps-clear:hover{border-color:#FDA4AF;color:#BE123C;background:#FFF1F2;}
+.party-result{display:grid;gap:10px;}
+.party-summary{
+  font-size:13px;font-weight:600;color:#334155;background:#F1F5F9;
+  border-radius:var(--radius-sm);padding:11px 13px;margin:0;word-break:keep-all;
+}
+.party-summary b{color:#0F172A;}
+.party-tip{font-size:11.5px;font-weight:700;color:#0369A1;}
+.party-block{display:grid;gap:8px;padding:12px 13px;border-radius:13px;background:#FBFDFF;border:1px solid #E6ECF3;}
+.party-h{font-size:12px;font-weight:800;color:#0369A1;letter-spacing:.03em;margin:0;}
+.party-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.party-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:4px 9px;border-radius:9px;
+  background:#FFFFFF;border:1px solid var(--line);font-size:11.5px;font-weight:800;color:var(--text-dim);
+}
+.party-chip b{font-size:11px;color:#BE123C;}
+.party-chip.is-weak{background:#FFF5F6;border-color:#FECDD3;}
+.party-none{font-size:12.5px;color:var(--muted);font-weight:600;margin:0;}
+.threat-list{display:grid;gap:7px;}
+.threat-row{
+  display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:8px;align-items:center;
+  padding:8px 10px;border-radius:11px;background:#FFFFFF;border:1px solid #F3D9DD;
+}
+.threat-name{font-size:13px;font-weight:800;color:#0F172A;margin:0 0 2px;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.threat-reason{font-size:11.5px;color:#9F1239;font-weight:700;margin:0;}
+.threat-types{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;}
+.threat-types .type-chip{font-size:10px;padding:2px 7px;}
+
+/* ═══════════ 레이드 인원별 클리어 계산 ═══════════ */
+.rc-block{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line-strong);}
+.rc-form{display:grid;gap:10px;margin:10px 0 12px;}
+@media(min-width:620px){ .rc-form{grid-template-columns:1fr 1fr;} }
+.rc-head{display:grid;gap:7px;padding:13px 14px;border-radius:14px;background:linear-gradient(180deg,#F8FCFF,#EFF7FE);border:1px solid #D7EBF8;}
+.rc-big{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.rc-people{
+  font-size:12.5px;font-weight:800;color:#075985;background:#E0F2FE;
+  border:1px solid #BAE6FD;padding:3px 10px;border-radius:999px;
+}
+.rc-time{font-size:22px;font-weight:800;letter-spacing:-.02em;color:#0F172A;font-variant-numeric:tabular-nums;}
+.rc-badge{font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px;border:1px solid transparent;}
+.rc-badge.is-easy{background:#ECFDF5;color:#047857;border-color:#A7F3D0;}
+.rc-badge.is-ok{background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;}
+.rc-badge.is-tight{background:#FFF7ED;color:#C2410C;border-color:#FED7AA;}
+.rc-badge.is-no{background:#FFF1F2;color:#BE123C;border-color:#FECDD3;}
+.rc-line{font-size:12.5px;font-weight:600;color:#334155;margin:0;word-break:keep-all;}
+.rc-limit{color:var(--muted);font-weight:600;}
+.rc-rows{display:grid;gap:5px;margin-top:10px;}
+.rc-row{
+  display:grid;grid-template-columns:52px 1fr auto;gap:8px;align-items:center;
+  padding:7px 11px;border-radius:10px;background:#FAFCFF;border:1px solid #EDF1F7;font-size:12.5px;
+}
+.rc-row.is-sel{background:#EFF9FF;border-color:#7DD3FC;box-shadow:0 0 0 2px rgba(14,165,233,.12);}
+.rc-n{font-weight:800;color:#0F172A;}
+.rc-t{font-weight:700;color:var(--text-dim);font-variant-numeric:tabular-nums;}
+.rc-v{font-weight:800;font-size:11.5px;}
+.rc-v.is-easy{color:#047857;} .rc-v.is-ok{color:#1D4ED8;} .rc-v.is-tight{color:#C2410C;} .rc-v.is-no{color:#BE123C;}
+.rc-note{font-size:11.5px;color:var(--muted-2);line-height:1.65;margin:10px 0 0;}
+.rc-empty{margin:0;font-size:12.5px;font-weight:600;color:var(--muted);background:#F8FAFC;border:1px dashed var(--line-strong);border-radius:12px;padding:13px;}
+
+/* ═══════════ 내 이로치 체크 · 이벤트 완료 체크 ═══════════ */
+.dex-own-chip b{font-weight:800;color:#B45309;}
+.dex-own-chip[aria-pressed="true"]{background:#FFFBEB;border-color:#FDE68A;color:#92400E;}
+.dex-card.is-own{border-color:#FDE68A;background:linear-gradient(180deg,#FFFDF5,#FFFFFF);}
+.dex-own-mark{position:absolute;left:8px;top:21px;font-size:11px;line-height:1;}
+.dex-mine{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;}
+.dex-own-btn{
+  display:inline-flex;align-items:center;gap:6px;padding:8px 13px;border-radius:999px;
+  background:#FFFFFF;border:1px solid var(--line-strong);color:var(--text-dim);
+  font-size:12.5px;font-weight:800;box-shadow:0 2px 0 rgba(15,23,42,.04);
+}
+.dex-own-btn:hover{border-color:#FCD34D;color:#92400E;}
+.dex-own-btn.is-on{background:#FFFBEB;border-color:#FCD34D;color:#92400E;}
+.dex-mine-hint{font-size:11px;color:var(--muted-2);font-weight:600;}
+.event-done{
+  display:inline-flex;align-items:center;gap:6px;margin-top:8px;
+  padding:5px 11px;border-radius:999px;background:#FFFFFF;border:1px solid var(--line-strong);
+  color:var(--muted);font-size:11.5px;font-weight:800;
+}
+.event-done:hover{border-color:#A7F3D0;color:#047857;}
+.event-done.is-done{background:#ECFDF5;border-color:#A7F3D0;color:#047857;}
+.ed-box{
+  width:14px;height:14px;border-radius:4px;border:1.5px solid currentColor;
+  display:grid;place-items:center;font-size:10px;line-height:1;font-weight:800;
+}
+.event-done.is-done .ed-box{background:#10B981;border-color:#10B981;color:#fff;}
+.event-progress{
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+  margin:0 0 10px;padding:9px 12px;border-radius:12px;
+  background:#F1FBF7;border:1px solid #C6F0E0;
+  font-size:12px;font-weight:700;color:#166534;
+}
+.ep-text b{color:#065F46;}
+.ep-hint{font-size:10.5px;font-weight:600;color:#5E8C77;}
+.ep-reset{
+  margin-left:auto;padding:3px 9px;border-radius:999px;background:#FFFFFF;
+  border:1px solid #C6F0E0;color:#166534;font-size:10.5px;font-weight:800;
+}
+.ep-reset:hover{border-color:#10B981;color:#065F46;}
+
+/* ── 좁은 화면 ── */
+@media(max-width:420px){
+  .counter-card{grid-template-columns:26px 34px minmax(0,1fr) auto;gap:8px;}
+  .counter-sprite{width:34px;height:34px;}
+  .tier-row{grid-template-columns:30px 38px minmax(0,1fr);gap:8px;}
+  .tier-sprite{width:38px;height:38px;}
+  .sg-out{flex-wrap:wrap;}
+  .sg-copy{width:100%;min-height:40px;}
+  .threat-row{grid-template-columns:34px minmax(0,1fr);}
+  .threat-types{grid-column:2;justify-content:flex-start;}
+  .rc-time{font-size:19px;}
+  .ps-picked{padding:6px;}
+}
