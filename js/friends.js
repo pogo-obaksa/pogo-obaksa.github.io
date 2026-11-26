@@ -95,10 +95,10 @@ function updateExpiryText() {
   const el = $('#fr-expiry');
   if (!el) return;
   el.innerHTML = state.purpose === 'raid'
-    ? '레이드 초대는 <strong>1시간</strong> 동안 목록에 보여요.'
+    ? '레이드 초대는 <strong>1시간</strong> 동안 목록에 보인단다.'
     : (state.purpose === 'gift'
-      ? '선물 교환 글은 <strong>24시간</strong> 동안 목록에 보여요.'
-      : '배틀·교환 글은 <strong>24시간</strong> 동안 목록에 보여요.');
+      ? '선물 교환 글은 <strong>24시간</strong> 동안 목록에 보인단다.'
+      : '배틀·교환 글은 <strong>24시간</strong> 동안 목록에 보인단다.');
 }
 
 function initSeg(containerId, dataKey) {
@@ -121,7 +121,7 @@ function refreshCooldown() {
   const left = state.coolingUntil - Date.now();
   if (left > 0 && !state.busy) {
     btn.disabled = true;
-    btn.textContent = '잠시만요 · ' + Math.ceil(left / 1000) + '초';
+    btn.textContent = '잠시만 · ' + Math.ceil(left / 1000) + '초';
   } else if (!state.busy) {
     btn.disabled = false;
     btn.textContent = '게시하기';
@@ -137,22 +137,22 @@ async function submit(ev) {
   const memo = String($('#fr-memo').value || '').trim();
 
   if (code.length !== 12) {
-    setStatus('트레이너 코드는 숫자 12자리예요. 게임 프로필에서 다시 확인해 주세요.', 'error');
+    setStatus('트레이너 코드는 숫자 12자리란다. 게임 프로필에서 다시 확인해 보렴.', 'error');
     $('#fr-code').focus();
     return;
   }
   if (nickname.length < 1 || nickname.length > 20) {
-    setStatus('닉네임은 1~20자로 적어 주세요.', 'error');
+    setStatus('닉네임은 1~20자로 적어 주렴.', 'error');
     $('#fr-nick').focus();
     return;
   }
   if (memo.length > 40) {
-    setStatus('메모는 40자까지 쓸 수 있어요.', 'error');
+    setStatus('메모는 40자까지 쓸 수 있단다.', 'error');
     $('#fr-memo').focus();
     return;
   }
   if (state.coolingUntil > Date.now()) {
-    setStatus('도배 방지를 위해 ' + Math.ceil((state.coolingUntil - Date.now()) / 1000) + '초 뒤에 다시 올릴 수 있어요.', 'warn');
+    setStatus('도배 방지를 위해 ' + Math.ceil((state.coolingUntil - Date.now()) / 1000) + '초 뒤에 다시 올릴 수 있단다.', 'warn');
     return;
   }
 
@@ -176,7 +176,7 @@ async function submit(ev) {
     const until = Date.now() + COOLDOWN_MS;
     state.coolingUntil = until;
     writeLastPost(until);
-    setStatus('올라갔어요. 목록에 바로 보이고, ' + (TTL[state.purpose] === TTL.raid ? '1시간' : '24시간') + ' 뒤에 자동으로 내려가요.', 'ok');
+    setStatus('올라갔단다! 목록에 바로 보이고, ' + (TTL[state.purpose] === TTL.raid ? '1시간' : '24시간') + ' 뒤에 자동으로 내려간단다.', 'ok');
     $('#fr-memo').value = '';
     $('#fr-code').value = '';
     state.busy = false;
@@ -190,11 +190,11 @@ async function submit(ev) {
     btn.textContent = '게시하기';
     const msg = String((err && err.code) || '');
     if (msg.indexOf('permission-denied') >= 0) {
-      setStatus('서버가 이 내용을 받아들이지 않았어요. 코드 12자리·닉네임 길이·메모 40자를 확인해 주세요.', 'error');
+      setStatus('서버가 이 내용을 받아들이지 않았구나. 코드 12자리·닉네임 길이·메모 40자를 확인해 보렴.', 'error');
     } else if (msg.indexOf('unavailable') >= 0 || msg.indexOf('network') >= 0) {
-      setStatus('네트워크가 불안정해 등록하지 못했어요. 잠시 뒤 다시 시도해 주세요.', 'error');
+      setStatus('네트워크가 불안정해 등록하지 못했구나. 잠시 뒤 다시 해 보렴.', 'error');
     } else {
-      setStatus('등록에 실패했어요. 잠시 뒤 다시 시도해 주세요.', 'error');
+      setStatus('등록에 실패했구나. 잠시 뒤 다시 해 보렴.', 'error');
     }
     console.error('[friends] addDoc failed', err);
   }
@@ -240,8 +240,8 @@ function render() {
   if (!rows.length) {
     list.innerHTML = '<p class="fr-empty">' +
       (state.filter === 'all'
-        ? '아직 올라온 코드가 없어요. 첫 번째로 남겨 보세요.'
-        : '이 목적의 코드는 아직 없어요. 다른 필터를 눌러 보거나 직접 올려 보세요.') +
+        ? '아직 올라온 코드가 없구나. 첫 번째로 남겨 보렴.'
+        : '이 목적의 코드는 아직 없단다. 다른 필터를 눌러 보거나 직접 올려 보렴.') +
       '</p>';
     return;
   }
@@ -318,7 +318,7 @@ function toggleQR(btn) {
     }
   } catch (e) {
     console.error('[friends] qr failed', e);
-    btn.textContent = 'QR를 만들지 못했어요';
+    btn.textContent = 'QR를 만들지 못했구나';
   }
 }
 
@@ -376,15 +376,15 @@ if (db) {
     render();
   }, (err) => {
     console.error('[friends] snapshot failed', err);
-    $('#fr-state').textContent = '목록을 불러오지 못했어요';
+    $('#fr-state').textContent = '목록을 불러오지 못했구나';
     const list = $('#fr-list');
     if (list && !state.docs.length) {
-      list.innerHTML = '<p class="fr-empty">게시판을 불러오지 못했어요. 새로고침하거나 잠시 뒤 다시 열어 주세요.</p>';
+      list.innerHTML = '<p class="fr-empty">게시판을 불러오지 못했구나. 새로고침하거나 잠시 뒤 다시 열어 보렴.</p>';
     }
   });
 } else {
   $('#fr-state').textContent = '연결 실패';
-  $('#fr-list').innerHTML = '<p class="fr-empty">게시판 연결에 실패했어요. 새로고침해 주세요.</p>';
+  $('#fr-list').innerHTML = '<p class="fr-empty">게시판 연결에 실패했구나. 새로고침해 보렴.</p>';
 }
 
 setInterval(tick, 15000);
