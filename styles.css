@@ -1301,7 +1301,7 @@ a.guide-card{color:inherit;font-family:var(--font);}
 .counter-sprite{width:40px;height:40px;}
 .tier-row{grid-template-columns:34px 44px minmax(0,1fr);align-items:start;}
 .tier-sprite{width:44px;height:44px;margin-top:1px;}
-.iv-sug-sprite{width:28px;height:28px;}
+.iv-sug-sprite{width:32px;height:32px;}
 
 /* ═══════════ 인게임 한글 검색식 생성기 ═══════════ */
 .sg-presets{

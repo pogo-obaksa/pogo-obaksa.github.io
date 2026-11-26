@@ -1030,7 +1030,7 @@
     }
     sug.innerHTML = ivState.list.map(function (p, i) {
       return '<li><button class="iv-sug' + (i === ivState.active ? ' is-active' : '') + '" type="button" data-iv-dex="' + p.id + '">' +
-        monSpriteHTML(p.id, 'iv-sug-sprite', 28) +
+        monSpriteHTML(p.id, 'iv-sug-sprite', 32) +
         '<span class="iv-sug-no">' + dexNo(p.id) + '</span>' +
         '<span class="iv-sug-name">' + p.n + '</span>' +
         '<span class="iv-sug-types">' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + '</span>' +
@@ -2408,7 +2408,7 @@
     }
     sug.innerHTML = partyState.lists[i].map(function (p, idx) {
       return '<li><button class="iv-sug' + (idx === 0 ? ' is-active' : '') + '" type="button" data-party-pick="' + i + '" data-party-dex="' + p.id + '">' +
-        monSpriteHTML(p.id, 'iv-sug-sprite', 28) +
+        monSpriteHTML(p.id, 'iv-sug-sprite', 32) +
         '<span class="iv-sug-no">' + dexNo(p.id) + '</span>' +
         '<span class="iv-sug-name">' + p.n + '</span>' +
         '<span class="iv-sug-types">' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + '</span>' +
