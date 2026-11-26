@@ -114,7 +114,7 @@
       badge: '새 시즌', emoji: '🌅', thumb: 'assets/events/daydream-destinations.jpg', priority: 80,
       desc: '12월 1일 10:00부터 2027년 3월 1일 10:00까지 이어지는 새 시즌.',
       tip: '시즌 첫날은 야생·레이드 로테이션이 한 번에 바뀌니 10시 전후로 접속해 두세요.',
-      source: 'https://leekduck.com/events/season-24-twilight-trails/'
+      source: 'https://leekduck.com/events/season-25-daydream-destinations/'
     }),
     E('tropical-paradise', '트로피컬 파라다이스', '2026-12-01T10:00:00+09:00', '2026-12-07T20:00:00+09:00', 'event', {
       badge: '메인 이벤트', emoji: '🏝️', thumb: 'assets/events/tropical-paradise.jpg', priority: 45,
@@ -162,7 +162,7 @@
       badge: '맥스배틀 데이', emoji: '💥', thumb: 'assets/events/max-battle-day.jpg', priority: 60,
       desc: '14:00~17:00 파워스팟 집중 개방. 다이맥스 보스가 몰려옵니다.',
       tip: '맥스무브 게이지를 채우려면 3마리 모두 다이맥스로 맞춰야 해요.',
-      source: 'https://leekduck.com/events/max-battle-day-december-2026/'
+      source: 'https://leekduck.com/events/gigantamax-inteleon-max-battle-day-2026/'
     }),
     E('deino-max-monday', '다이맥스 모노두 맥스 먼데이', '2026-12-07T06:00:00+09:00', '2026-12-07T21:00:00+09:00', 'max', {
       badge: '맥스 먼데이', emoji: '🐲', pokemonId: 633, priority: 40,
