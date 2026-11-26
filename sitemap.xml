@@ -1,18 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 오박사의 포켓몬 백과사전 (포켓몬고 허브) — https://pogo-obaksa.github.io/
-     홈 1 + 친구추가 1 + 공략 12편 + 정책 3 = 총 17개 URL. tools/build_guide_pages.py 가 생성한다. -->
+     홈 1 + 공략 12편 + 정책 3 = 총 16개 URL. tools/build_guide_pages.py 가 생성한다. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pogo-obaksa.github.io/</loc>
     <lastmod>2026-11-27</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://pogo-obaksa.github.io/friends.html</loc>
-    <lastmod>2026-11-27</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://pogo-obaksa.github.io/guide/stardust-priority.html</loc>

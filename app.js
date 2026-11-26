@@ -969,235 +969,6 @@
       '<table><thead><tr><th>구간</th><th>모래</th><th>사탕</th><th>XL</th></tr></thead><tbody>' + rows + '</tbody></table>';
   }
 
-  /* ─────────────── 사탕·별의모래 도달 레벨 역산기 ───────────────
-     지금 가진 모래·사탕·XL사탕을 다 넣으면 어디까지 오르는지, 40·50레벨까지 얼마나 모자란지를
-     위 육성 계산기와 같은 비용 테이블(costAt)로 계산한다. 강화 1회 = 0.5레벨. */
-  var revState = { from: 20, kind: 'normal', mon: null, a: 15, d: 15, s: 15 };
-
-  function revMult() {
-    /* 반짝반짝(이로치)은 색만 다르고 비용은 일반과 같다 */
-    var k = revState.kind === 'shiny' ? 'normal' : revState.kind;
-    return KIND_MULT[k] || KIND_MULT.normal;
-  }
-
-  /* from → to 구간 비용 (표시값과 같은 반올림 방식) */
-  function revNeed(from, to) {
-    if (!(to > from)) return { dust: 0, candy: 0, xl: 0, steps: 0 };
-    var m = revMult();
-    var res = powerUpCost(from, to);
-    return {
-      dust: Math.round(res.raw.dust * m.dust),
-      candy: Math.round(res.raw.candy * m.candy),
-      xl: Math.round(res.raw.xl * m.candy),
-      steps: res.steps
-    };
-  }
-
-  /* 가진 자원으로 도달할 수 있는 최고 레벨 */
-  function revReach(from, have) {
-    var m = revMult();
-    var raw = { dust: 0, candy: 0, xl: 0 };
-    var lv = from, used = { dust: 0, candy: 0, xl: 0 }, steps = 0;
-    while (lv < 49.9999) {
-      var c = costAt(lv);
-      raw.dust += c.dust; raw.candy += c.candy; raw.xl += c.xl;
-      var d = Math.round(raw.dust * m.dust);
-      var cd = Math.round(raw.candy * m.candy);
-      var x = Math.round(raw.xl * m.candy);
-      if (d > have.dust || cd > have.candy || x > have.xl) break;
-      used = { dust: d, candy: cd, xl: x };
-      lv = Math.round((lv + 0.5) * 2) / 2;
-      steps++;
-    }
-    return { level: lv, used: used, steps: steps };
-  }
-
-  function revNumInput(id) {
-    var el = $('#' + id);
-    if (!el) return 0;
-    var v = parseInt(String(el.value || '0').replace(/[^0-9]/g, ''), 10);
-    if (!isFinite(v) || v < 0) v = 0;
-    return v;
-  }
-
-  function revSuggest(raw) {
-    var sug = $('#rev-suggest');
-    if (!sug) return;
-    var q = String(raw || '').trim();
-    if (!q) { sug.hidden = true; sug.innerHTML = ''; return; }
-    var list = dexSearch(q, 8);
-    if (!list.length) {
-      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호로 다시 입력해 보세요.</li>';
-      sug.hidden = false;
-      return;
-    }
-    sug.innerHTML = list.map(function (p) {
-      return '<li><button class="iv-sug" type="button" data-rev-dex="' + p.id + '">' +
-        monSpriteHTML(p.id, 'iv-sug-sprite', 32) +
-        '<span class="iv-sug-no">' + dexNo(p.id) + '</span>' +
-        '<span class="iv-sug-name">' + p.n + '</span>' +
-        '<span class="iv-sug-types">' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + '</span>' +
-      '</button></li>';
-    }).join('');
-    sug.hidden = false;
-  }
-
-  function revPick(id) {
-    var p = DEX.filter(function (x) { return x.id === Number(id); })[0];
-    if (!p) return;
-    revState.mon = p;
-    $('#rev-q').value = p.n;
-    $('#rev-suggest').hidden = true;
-    var picked = $('#rev-picked');
-    picked.hidden = false;
-    picked.innerHTML = '<img src="' + dexArt(p.id, false) + '" alt="" width="34" height="34" onerror="this.style.display=\'none\'">' +
-      '<b>' + p.n + '</b> <span>' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + ' · 최대 CP ' + num(maxCP(p, CPM50)) + '</span>';
-    var iv = $('#rev-iv');
-    if (iv) iv.hidden = false;
-    track('rev_pick', { pokemon: p.n, dex_id: p.id });
-    updateRev();
-  }
-
-  function initRev() {
-    var fromSel = $('#rev-from');
-    if (!fromSel) return;
-    var opts = [];
-    for (var l = 1; l <= 49.5; l += 0.5) opts.push('<option value="' + l + '">' + levelLabel(l) + '</option>');
-    fromSel.innerHTML = opts.join('');
-    fromSel.value = '20';
-    fromSel.addEventListener('change', function () {
-      revState.from = Number(fromSel.value) || 20;
-      updateRev();
-    });
-
-    var kinds = $$('#rev-kind .seg');
-    kinds.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        kinds.forEach(function (b) { b.classList.remove('is-active'); });
-        btn.classList.add('is-active');
-        revState.kind = btn.getAttribute('data-rev-kind') || 'normal';
-        updateRev();
-      });
-    });
-
-    ['rev-dust', 'rev-candy', 'rev-xl'].forEach(function (id) {
-      var el = $('#' + id);
-      if (!el) return;
-      el.addEventListener('input', updateRev);
-      el.addEventListener('change', updateRev);
-    });
-
-    ['rev-a', 'rev-d', 'rev-s'].forEach(function (id) {
-      var el = $('#' + id);
-      if (!el) return;
-      el.addEventListener('input', function () {
-        var v = parseInt(el.value, 10);
-        if (!isFinite(v)) v = 15;
-        el.value = Math.max(0, Math.min(15, v));
-        updateRev();
-      });
-    });
-
-    var q = $('#rev-q');
-    var sug = $('#rev-suggest');
-    if (q) {
-      q.addEventListener('input', function () { revSuggest(q.value); });
-      q.addEventListener('keydown', function (e) {
-        if (e.key !== 'Enter') return;
-        e.preventDefault();
-        var first = sug && !sug.hidden ? sug.querySelector('[data-rev-dex]') : null;
-        if (first) revPick(first.getAttribute('data-rev-dex'));
-      });
-    }
-    if (sug) {
-      sug.addEventListener('click', function (e) {
-        var b = e.target.closest('[data-rev-dex]');
-        if (!b) return;
-        revPick(b.getAttribute('data-rev-dex'));
-      });
-    }
-    document.addEventListener('click', function (e) {
-      if (!e.target.closest('.rev-search')) { if (sug) sug.hidden = true; }
-    });
-
-    updateRev();
-  }
-
-  function revGoalHTML(target, from, have) {
-    var need = revNeed(from, target);
-    var already = from >= target - 0.0001;
-    var shortDust = Math.max(0, need.dust - have.dust);
-    var shortCandy = Math.max(0, need.candy - have.candy);
-    var shortXl = Math.max(0, need.xl - have.xl);
-    var allOk = already || (shortDust === 0 && shortCandy === 0 && shortXl === 0);
-    var bits = [];
-    if (already) {
-      bits.push(from <= target + 0.0001
-        ? '이미 ' + levelLabel(from) + ' — ' + target + '레벨이야'
-        : '이미 ' + levelLabel(from) + ' — ' + target + '레벨을 넘겼어');
-    } else if (allOk) {
-      bits.push('필요 <strong>' + num(need.dust) + '</strong> 모래 · 사탕 <strong>' + num(need.candy) + '</strong>' +
-        (need.xl ? ' · XL <strong>' + num(need.xl) + '</strong>' : '') + ' — 바로 도달 가능');
-    } else {
-      if (shortDust) bits.push('모래 <span class="short">' + num(shortDust) + '</span>');
-      if (shortCandy) bits.push('사탕 <span class="short">' + num(shortCandy) + '</span>');
-      if (shortXl) bits.push('XL사탕 <span class="short">' + num(shortXl) + '</span>');
-    }
-    return '<div class="rev-goal ' + (allOk ? 'is-ok' : 'is-short') + '">' +
-      '<div class="rev-goal-head"><span class="rev-goal-title">' + target + '레벨까지</span>' +
-        '<span class="rev-goal-badge">' + (already ? '통과' : (allOk ? '가능' : '부족')) + '</span></div>' +
-      '<p class="rev-goal-need">' + (allOk ? bits.join(' · ') : bits.join(' · ') + ' 모자라') + '</p>' +
-    '</div>';
-  }
-
-  function updateRev() {
-    var box = $('#rev-result');
-    if (!box) return;
-    var from = revState.from;
-    var have = { dust: revNumInput('rev-dust'), candy: revNumInput('rev-candy'), xl: revNumInput('rev-xl') };
-    var reach = revReach(from, have);
-    var kindLabel = { normal: '일반', shadow: '그림자', purified: '정화', shiny: '반짝반짝', lucky: '럭키' }[revState.kind] || '일반';
-
-    var head;
-    if (reach.level <= from + 0.0001) {
-      /* 어느 재화가 발목을 잡는지 정확히 짚어 준다 (XL사탕 0개면 모래가 넘쳐도 40레벨에서 멈춘다) */
-      var step = revNeed(from, from + 0.5);
-      var lack = [];
-      if (step.dust > have.dust) lack.push('모래 ' + num(step.dust - have.dust) + '개');
-      if (step.candy > have.candy) lack.push('사탕 ' + num(step.candy - have.candy) + '개');
-      if (step.xl > have.xl) lack.push('XL사탕 ' + num(step.xl - have.xl) + '개');
-      head = '<span class="rev-hero-label">지금 가진 자원으로는</span>' +
-        '<strong class="rev-hero-level">' + levelLabel(from) + ' 그대로</strong>' +
-        '<span class="rev-hero-sub">강화 한 번에 모래 ' + num(step.dust) +
-          (step.candy ? ' · 사탕 ' + num(step.candy) : '') +
-          (step.xl ? ' · XL사탕 ' + num(step.xl) : '') + '이 들어. ' +
-          (lack.length ? lack.join(' · ') + '만 더 모으면 ' + levelLabel(from + 0.5) + '까지 갈 수 있어.' : '') + '</span>';
-    } else {
-      head = '<span class="rev-hero-label">지금 가진 자원으로 도달 가능</span>' +
-        '<strong class="rev-hero-level">' + levelLabel(reach.level) + '</strong>' +
-        '<span class="rev-hero-sub">' + levelLabel(from) + ' → ' + levelLabel(reach.level) + ' · ' + kindLabel +
-          ' · 강화 ' + reach.steps + '회 · 모래 ' + num(reach.used.dust) + ' · 사탕 ' + num(reach.used.candy) +
-          (reach.used.xl ? ' · XL사탕 ' + num(reach.used.xl) : '') + ' 소모</span>';
-    }
-
-    var p = revState.mon;
-    if (p) {
-      var a = Math.max(0, Math.min(15, parseInt(($('#rev-a') || {}).value, 10) || 0));
-      var d = Math.max(0, Math.min(15, parseInt(($('#rev-d') || {}).value, 10) || 0));
-      var s = Math.max(0, Math.min(15, parseInt(($('#rev-s') || {}).value, 10) || 0));
-      var cpm = CPM_TABLE[reach.level] || CPM_TABLE[Math.floor(reach.level)] || 0;
-      var cp = cpm ? cpAt(p, a, d, s, cpm) : 0;
-      var cp40 = cpAt(p, a, d, s, CPM_TABLE[40]);
-      var cp50 = cpAt(p, a, d, s, CPM50);
-      var reachLabel = reach.level > from + 0.0001 ? '예상 CP' : '지금 CP';
-      head += '<span class="rev-hero-cp">' + monSpriteHTML(p.id, '', 26) + '<span>' + p.n + ' ' + reachLabel + '</span>' +
-        '<b>' + num(cp) + '</b> <span style="opacity:.85;font-weight:700">(Lv.40 ' + num(cp40) + ' · Lv.50 ' + num(cp50) + ')</span></span>';
-    }
-
-    box.innerHTML = '<div class="rev-hero">' + head + '</div>' +
-      '<div class="rev-goals">' + revGoalHTML(40, from, have) + revGoalHTML(50, from, have) + '</div>';
-  }
-
   /* ─────────────── 배틀리그 IV 순위 계산기 ───────────────
      CP 상한(1500·2500) 안에서 도달하는 최고 레벨의 스탯 프로덕트로 4,096조합 순위를 매긴다. */
   var CPM_LEVELS = Object.keys(CPM_TABLE).map(Number).sort(function (a, b) { return a - b; });
@@ -2158,24 +1929,17 @@
         '<li>이 기록은 그 브라우저에만 남기 때문에 다른 기기에서는 보이지 않고, 브라우저 데이터를 지우면 함께 삭제됩니다.</li>' +
         '<li>「복사」 버튼으로 복사한 검색식은 이용자 클립보드에만 들어가고 사이트가 따로 보관하지 않습니다.</li>' +
         '</ul>' +
-        '<h3>4. 친구추가 게시판에 올린 정보</h3>' +
-        '<ul>' +
-        '<li>「실시간 트레이너 코드 친구추가」에 입력한 <strong>닉네임·트레이너 코드·메모·팀·목적</strong>은 만료 시간(레이드 1시간, 선물·배틀 24시간)까지 Google Firebase Firestore에 공개 저장되고, 만료 후 노출이 중단됩니다.</li>' +
-        '<li>게시판은 로그인이 없는 공개 게시판이며, 이름·전화번호·이메일은 입력받지 않습니다. 저장 위치는 Google Cloud 서울 리전(asia-northeast3)입니다.</li>' +
-        '<li>게시글 수정·삭제는 화면에서 제공하지 않으며, 삭제 요청은 아래 문의 채널로 닉네임과 게시 시간을 알려 주시면 처리합니다.</li>' +
-        '<li>도배 방지 60초 제한 기록은 이용자 브라우저(localStorage)에만 남습니다.</li>' +
-        '</ul>' +
-        '<h3>5. 쿠키 및 제3자 광고</h3>' +
+        '<h3>4. 쿠키 및 제3자 광고</h3>' +
         '<ul>' +
         '<li>Google을 비롯한 제3자 광고 사업자는 쿠키를 사용해 이용자의 이전 방문 기록에 기반한 광고를 게재할 수 있습니다.</li>' +
         '<li>Google의 광고 쿠키 사용으로 이용자는 Google 광고 설정(adssettings.google.com)에서 맞춤 광고를 해제할 수 있습니다.</li>' +
         '<li>브라우저 설정에서 쿠키 저장을 거부할 수 있으며, 이 경우 일부 기능 이용에 제한이 있을 수 있습니다.</li>' +
         '</ul>' +
-        '<h3>6. 보관 및 파기</h3>' +
+        '<h3>5. 보관 및 파기</h3>' +
         '<p>자동 수집 정보는 목적 달성 후 지체 없이 파기하며, 법령에서 정한 기간 동안만 보관합니다.</p>' +
-        '<h3>7. 이용자의 권리</h3>' +
+        '<h3>6. 이용자의 권리</h3>' +
         '<p>이용자는 언제든지 자신의 정보 처리에 관한 열람·정정·삭제를 요청할 수 있습니다.</p>' +
-        '<h3>8. 문의</h3>' +
+        '<h3>7. 문의</h3>' +
         '<p>개인정보 관련 문의는 운영자 이메일 <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a> 또는 하단 <strong>문의</strong> 메뉴로 접수해 주세요.</p>' +
         '<p style="color:var(--muted)">시행일: 2026년 11월 27일</p>'
     },
@@ -3005,7 +2769,6 @@
     initRaidCount();
     initTypeCalc();
     initPowerUp();
-    initRev();
     initIV();
     initTier();
     initParty();
@@ -3111,7 +2874,6 @@
     searchGen: { build: sgBuild, state: sgState, presets: SG_PRESETS },
     party: { state: partyState, pick: partyPick, clear: partyClear, analyze: partyAnalyze, result: renderPartyResult },
     raidCount: { state: rcState, compute: rcCompute, render: renderRaidCount },
-    rev: { state: revState, reach: revReach, need: revNeed, update: updateRev, pick: revPick },
     myShiny: { owned: shinyOwned, set: shinySet, count: shinyCount },
     eventDone: { is: eventIsDone },
     dexIdOfName: dexIdOfName
