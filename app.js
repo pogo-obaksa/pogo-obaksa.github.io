@@ -374,10 +374,10 @@
 
     $('#ongoing-list').innerHTML = lists.ongoing.length
       ? lists.ongoing.map(function (ev) { return cardHTML(ev, now); }).join('')
-      : '<p class="fineprint">이 조건에 진행 중인 일정이 없어요.</p>';
+      : '<p class="fineprint">이 조건에 진행 중인 일정이 없단다.</p>';
     $('#upcoming-list').innerHTML = lists.upcoming.length
       ? lists.upcoming.map(function (ev) { return cardHTML(ev, now); }).join('')
-      : '<p class="fineprint">이 조건에 예정된 일정이 없어요.</p>';
+      : '<p class="fineprint">이 조건에 예정된 일정이 없단다.</p>';
 
     $('#ongoing-count').textContent = lists.ongoing.length;
     $('#upcoming-count').textContent = lists.upcoming.length;
@@ -441,7 +441,7 @@
         });
         eventDoneSave();
         renderEvents();
-        toast(cleared ? '이번 주 완료 기록을 지웠어요' : '지울 기록이 없어요');
+        toast(cleared ? '이번 주 완료 기록을 지웠단다' : '지울 기록이 없구나');
       }
     });
   }
@@ -730,7 +730,7 @@
             '<span class="type-chip" style="background:' + w.color + ';color:' + PGO.typeText(w.type) + '">' + w.ko + '</span>' +
             '<b>×' + w.mult.toFixed(3).replace(/0+$/, '').replace(/\.$/, '') + '</b></span>';
         }).join('')
-      : '<span class="fineprint">약점이 없습니다.</span>';
+      : '<span class="fineprint">약점이 없단다.</span>';
 
     var weakIds = weak.map(function (w) { return w.type; });
     var weathers = PGO.WEATHER.map(function (w) {
@@ -742,7 +742,7 @@
           return '<span class="weather-chip">' + x.w.icon + ' ' + x.w.ko + ' <span style="opacity:.75">' +
             PGO.typeKoList(x.hit).join('·') + ' 딜 +20%</span></span>';
         }).join('')
-      : '<span class="fineprint">약점 타입을 부스트하는 날씨가 없습니다.</span>';
+      : '<span class="fineprint">약점 타입을 부스트하는 날씨가 없단다.</span>';
 
     renderBossCounters(boss);
     renderRaidCount(boss);
@@ -752,8 +752,8 @@
       tipEl.hidden = false;
       var tips = boss.types.map(function (t) { return MAX_TIPS[t]; }).filter(Boolean);
       tipEl.innerHTML = '⚡ <strong>다이맥스(맥스배틀) 안내</strong> — ' +
-        (tips.length ? tips.join(' ') : '맥스무브는 다이맥스 포켓몬의 타입을 따라가요. 같은 타입 다이맥스를 3마리 준비하세요.') +
-        '<br>아래 카운터는 일반 레이드 기준이니, 맥스배틀에서는 참고만 하세요.';
+        (tips.length ? tips.join(' ') : '맥스무브는 다이맥스 포켓몬의 타입을 따라간단다. 같은 타입 다이맥스를 3마리 준비해 보렴.') +
+        '<br>아래 카운터는 일반 레이드 기준이니, 맥스배틀에서는 참고만 하렴.';
     } else {
       tipEl.hidden = true;
       tipEl.innerHTML = '';
@@ -949,12 +949,12 @@
     var kindLabel = { normal: '일반', shadow: '그림자', purified: '정화', lucky: '럭키' }[kind];
     var line;
     if (from === to) {
-      line = '현재 레벨과 목표 레벨이 같아요. 목표를 더 높게 잡아 주세요.';
+      line = '현재 레벨과 목표 레벨이 같구나. 목표를 더 높게 잡아 보렴.';
     } else if (from > to) {
-      line = '목표 레벨이 현재보다 낮아 계산할 수 없어요.';
+      line = '목표 레벨이 현재보다 낮으면 계산할 수 없단다.';
     } else {
       line = '<b>' + levelLabel(from) + ' → ' + levelLabel(to) + '</b> · ' + kindLabel + ' · 강화 ' + res.steps + '회' +
-        (raw.xl > 0 ? ' · 40레벨 이후 구간에 XL사탕이 포함됩니다' : '');
+        (raw.xl > 0 ? ' · 40레벨 이후 구간에 XL사탕이 섞여 있지' : '');
     }
     $('#powerup-summary').innerHTML = line;
 
@@ -1024,7 +1024,7 @@
     ivState.list = dexSearch(q, 8);
     ivState.active = 0;
     if (!ivState.list.length) {
-      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호(25, 025, #25)로 다시 입력해 보세요.</li>';
+      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없구나. 이름·초성·도감번호(25, 025, #25)로 다시 찾아보렴.</li>';
       sug.hidden = false;
       return;
     }
@@ -1060,7 +1060,7 @@
     var p = ivState.mon;
     var topWrap = $('#iv-top-wrap');
     if (!p) {
-      box.innerHTML = '<p class="iv-empty">포켓몬을 먼저 선택하면 순위가 바로 나옵니다.</p>';
+      box.innerHTML = '<p class="iv-empty">포켓몬을 먼저 고르면 순위가 바로 나온단다.</p>';
       if (topWrap) topWrap.hidden = true;
       return;
     }
@@ -1078,7 +1078,7 @@
     var maxLv = CPM_LEVELS[CPM_LEVELS.length - 1];
     var maxCp = cpAt(p, 15, 15, 15, CPM_TABLE[maxLv]);
     var shortNote = maxCp < ivState.cap
-      ? '<p class="iv-short">50레벨 최대 CP가 ' + num(maxCp) + '이라 ' + num(ivState.cap) + ' 상한에 닿지 않아요. 이 경우 15/15/15가 가장 강합니다.</p>'
+      ? '<p class="iv-short">50레벨 최대 CP가 ' + num(maxCp) + '이라 ' + num(ivState.cap) + ' 상한에 닿지 않지. 이럴 때는 15/15/15가 가장 강하단다.</p>'
       : '';
     var atk = (p.a + me.a) * cpm, def = (p.d + me.d) * cpm, sta = Math.floor((p.s + me.s) * cpm);
     var grade = me.rank <= 10 ? 'S' : me.rank <= 100 ? 'A' : me.rank <= 500 ? 'B' : me.rank <= 1500 ? 'C' : 'D';
@@ -1107,7 +1107,7 @@
         '<span class="iv-best-label">이 리그 1위</span>' +
         '<b>' + best.a + '/' + best.d + '/' + best.s + '</b>' +
         '<span>' + ivLvText(best.lv) + ' · CP ' + num(best.cp) + ' · 스탯 ' + num(Math.round(best.prod)) + '</span>' +
-        (me.rank === 1 ? '<span class="iv-crown">이미 1위 개체값이에요 🎉</span>' : '') +
+        (me.rank === 1 ? '<span class="iv-crown">이미 1위 개체값이란다 🎉</span>' : '') +
       '</div>' + shortNote;
 
     if (topWrap) {
@@ -1209,7 +1209,7 @@
     var rows = PVP_TIER[tierState.lg] || [];
     list.innerHTML = rows.length
       ? rows.map(tierRowHTML).join('')
-      : '<p class="iv-empty">랭킹 데이터를 불러오지 못했어요.</p>';
+      : '<p class="iv-empty">랭킹 데이터를 불러오지 못했구나.</p>';
   }
 
   function initTier() {
@@ -1359,8 +1359,8 @@
     $('#dex-grid').innerHTML = slice.map(dexCardHTML).join('');
     $('#dex-empty').hidden = total > 0;
     $('#dex-empty').textContent = dexState.ownOnly && !total
-      ? '아직 체크한 이로치가 없어요. 포켓몬 상세를 열어 🏅를 눌러 보세요.'
-      : '조건에 맞는 포켓몬이 없어요. 이름·초성·도감번호로 다시 검색해 보세요.';
+      ? '아직 체크한 이로치가 없구나. 포켓몬 상세를 열어 🏅를 눌러 보렴.'
+      : '조건에 맞는 포켓몬이 없구나. 이름·초성·도감번호로 다시 찾아보렴.';
     $('#dex-own-count').textContent = shinyCount();
     $('#dex-own-only').setAttribute('aria-pressed', dexState.ownOnly ? 'true' : 'false');
     $('#dex-own-only').classList.toggle('is-active', dexState.ownOnly);
@@ -1413,13 +1413,13 @@
       return '<span class="weak-chip' + (w.mult > 2.5 ? ' is-double' : '') + '">' +
         '<span class="type-chip" style="background:' + w.color + ';color:' + PGO.typeText(w.type) + '">' + w.ko + '</span>' +
         '<b>×' + multText(w.mult) + '</b></span>';
-    }).join('') : '<p class="dex-none">약점이 없어요.</p>';
+    }).join('') : '<p class="dex-none">약점이 없단다.</p>';
 
     var resistHTML = resist.length ? resist.map(function (w) {
       return '<span class="weak-chip">' +
         '<span class="type-chip" style="background:' + w.color + ';color:' + PGO.typeText(w.type) + '">' + w.ko + '</span>' +
         '<b>×' + multText(w.mult) + '</b></span>';
-    }).join('') : '<p class="dex-none">반감 타입이 없어요.</p>';
+    }).join('') : '<p class="dex-none">반감 타입이 없단다.</p>';
 
     $('#dex-sheet-body').innerHTML =
       '<div class="dex-hero">' +
@@ -1615,8 +1615,8 @@
         ownToggle.textContent = next ? '🏅 내 이로치로 체크됨' : '🏅 내 이로치로 체크';
         renderDex();
         track('my_shiny_toggle', { pokemon_no: pm.id, pokemon_name: pm.n, owned: next });
-        if (next) toast(pm.n + ' 이로치를 체크했어요');
-        else toast(pm.n + ' 이로치 체크를 해제했어요');
+        if (next) toast(pm.n + ' 이로치를 체크했단다');
+        else toast(pm.n + ' 이로치 체크를 해제했단다');
         return;
       }
       if (e.target.closest('#dex-shiny-toggle')) {
@@ -1816,10 +1816,10 @@
     var url = location.href;
     track('guide_share', { guide_slug: guideState.slug || '' });
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(function () { toast('이 글 링크를 복사했어요'); })
-        .catch(function () { toast('주소창의 링크를 복사해 주세요'); });
+      navigator.clipboard.writeText(url).then(function () { toast('이 글 링크를 복사했단다'); })
+        .catch(function () { toast('주소창의 링크를 복사해 보렴'); });
     } else {
-      toast('주소창의 링크를 복사해 주세요');
+      toast('주소창의 링크를 복사해 보렴');
     }
   }
 
@@ -1962,13 +1962,13 @@
     contact: {
       title: '문의',
       body:
-        '<p>일정 오류 제보, 기능 건의, 광고·제휴 문의는 아래 채널로 보내 주세요. 확인 후 순서대로 답변드립니다.</p>' +
+        '<p>일정 오류 제보, 기능 건의, 광고·제휴 문의는 아래 채널로 보내 주렴. 확인하는 대로 순서대로 답한단다.</p>' +
         '<ul>' +
         '<li><strong>이메일</strong> — <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a></li>' +
         '<li><strong>블로그</strong> — blog.naver.com/seopp 의 최신 글 댓글</li>' +
         '<li><strong>인스타그램</strong> — @obak.sa DM</li>' +
         '</ul>' +
-        '<p style="color:var(--muted)">일정 오류를 알려주실 때는 이벤트 이름과 화면에 보이는 시각을 함께 적어 주시면 빠르게 확인할 수 있어요.</p>'
+        '<p style="color:var(--muted)">일정 오류를 알려줄 때는 이벤트 이름과 화면에 보이는 시각을 함께 적어 주면 빨리 확인할 수 있단다.</p>'
     },
     disclaimer: {
       title: '면책조항',
@@ -1988,9 +1988,9 @@
     about: {
       title: '소개',
       body:
-        '<p>「오박사의 포켓몬 백과사전」은 포켓몬고를 오래 즐겨 온 트레이너가 매일 쓰려고 만든 도구 모음입니다.</p>' +
-        '<p>해외 일정 사이트는 시간이 현지 기준이라 매번 계산해야 하고, 카운터 정보는 여러 페이지를 오가야 했습니다. 그래서 <strong>한국 시간 기준 일정 · 약점과 카운터 · 육성 비용</strong>을 한 화면에 모았습니다.</p>' +
-        '<p>광고는 서버 유지비를 위해 일정과 본문 사이의 빈 영역에만 배치하며, 콘텐츠를 가리지 원칙으로 운영합니다.</p>' +
+        '<p>「오박사의 포켓몬 백과사전」은 포켓몬고를 오래 즐겨 온 트레이너가 매일 쓰려고 만든 도구 모음이란다.</p>' +
+        '<p>해외 일정 사이트는 시간이 현지 기준이라 매번 계산해야 하고, 카운터 정보는 여러 페이지를 오가야 했지. 그래서 <strong>한국 시간 기준 일정 · 약점과 카운터 · 육성 비용</strong>을 한 화면에 모았단다.</p>' +
+        '<p>광고는 서버 유지비를 위해 일정과 본문 사이의 빈 영역에만 넣고, 콘텐츠는 가리지 않는 원칙으로 운영하지.</p>' +
         '<p>운영: 오박사의 포켓몬 백과사전 (blog.naver.com/seopp)</p>'
     }
   };
@@ -2036,10 +2036,10 @@
         return;
       }
       if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function () { toast('링크를 복사했어요'); })
-          .catch(function () { toast('주소창의 링크를 복사해 주세요'); });
+        navigator.clipboard.writeText(url).then(function () { toast('링크를 복사했단다'); })
+          .catch(function () { toast('주소창의 링크를 복사해 보렴'); });
       } else {
-        toast('주소창의 링크를 복사해 주세요');
+        toast('주소창의 링크를 복사해 보렴');
       }
     });
   }
@@ -2182,37 +2182,37 @@
   var SG_PRESETS = [
     {
       id: 'doctor', label: '박사 보내기용',
-      note: '100%·이로치·그림자·전설·환상·울트라비스트·코스튬·즐겨찾기·태그·특별한 기술·럭키를 빼고 남깁니다. 여기 나오는 포켓몬이 보내기 후보예요.',
+      note: '100%·이로치·그림자·전설·환상·울트라비스트·코스튬·즐겨찾기·태그·특별한 기술·럭키를 빼고 남긴단다. 여기 나오는 포켓몬이 보내기 후보지.',
       state: { ex: sgAllEx(), grade: '', days: '', iv: '', cp: '' }
     },
     {
       id: 'pvp', label: '배틀리그 0공격',
-      note: '공격은 낮고 방어·HP가 높은 배틀리그형 개체를 찾습니다. CP를 같이 고르면 슈퍼·하이퍼리그 상한 안에 있는 것만 남아요.',
+      note: '공격은 낮고 방어·HP가 높은 배틀리그형 개체를 찾는단다. CP를 같이 고르면 슈퍼·하이퍼리그 상한 안에 있는 것만 남지.',
       state: { ex: sgBlankEx(), grade: '', days: '', iv: '0-1공격&3-4방어&3-4HP', cp: '' }
     },
     {
       id: 'cd', label: '커뮤니티데이 정리',
-      note: '오늘 잡은 포켓몬 중에서 100%·이로치·그림자·코스튬·즐겨찾기·태그를 뺀 나머지만 보여 줍니다. 커뮤니티데이 마무리에 쓰세요.',
+      note: '오늘 잡은 포켓몬 중에서 100%·이로치·그림자·코스튬·즐겨찾기·태그를 뺀 나머지만 보여 준단다. 커뮤니티데이 마무리에 써 보렴.',
       state: { ex: (function () { var m = sgBlankEx(); m.star4 = 1; m.shiny = 1; m.shadow = 1; m.costume = 1; m.favorite = 1; m.tagged = 1; return m; })(), grade: '', days: '일수0', iv: '', cp: '' }
     },
     {
       id: 'week', label: '최근 7일 잉여 정리',
-      note: '일주일 동안 잡은 것 중에서 남길 만한 개체를 빼고 보여 줍니다. 대량 보내기 전에 한 번 더 확인하세요.',
+      note: '일주일 동안 잡은 것 중에서 남길 만한 개체를 빼고 보여 준단다. 대량 보내기 전에 한 번 더 확인하렴.',
       state: { ex: (function () { var m = sgBlankEx(); m.star4 = 1; m.shiny = 1; m.shadow = 1; m.legendary = 1; m.mythical = 1; m.favorite = 1; m.tagged = 1; return m; })(), grade: '', days: '일수0-7', iv: '', cp: '' }
     },
     {
       id: 'shiny', label: '이로치만 모아보기',
-      note: '가지고 있는 이로치를 한 번에 보여 줍니다. 이로치 체크는 이 사이트 «도감 → 🏅 내 이로치»에 저장해 두세요.',
+      note: '가지고 있는 이로치를 한 번에 보여 준단다. 이로치 체크는 이 사이트 «도감 → 🏅 내 이로치»에 저장해 두렴.',
       state: { ex: sgBlankEx(), grade: '', days: '', iv: '', cp: '' , only: '색이 다른' }
     },
     {
       id: 'lucky', label: '럭키 교환 후보',
-      note: '반짝반짝(럭키) 포켓몬 중 3~4성만 보여 줍니다. 교환으로 개체값을 올릴 후보를 고를 때 쓰세요.',
+      note: '반짝반짝(럭키) 포켓몬 중 3~4성만 보여 준단다. 교환으로 개체값을 올릴 후보를 고를 때 써 보렴.',
       state: { ex: sgBlankEx(), grade: '3*,4*', days: '', iv: '', cp: '', only: '반짝반짝' }
     },
     {
       id: 'evolve', label: '도감 신규 진화',
-      note: '지금 진화할 수 있고, 진화한 모습이 아직 도감에 없는 포켓몬만 보여 줍니다. 도감 채울 때 좋아요.',
+      note: '지금 진화할 수 있고, 진화한 모습이 아직 도감에 없는 포켓몬만 보여 준단다. 도감 채울 때 좋지.',
       state: { ex: sgBlankEx(), grade: '', days: '', iv: '', cp: '', only: '진화&미등록' }
     }
   ];
@@ -2245,14 +2245,14 @@
     for (var i = 0; i < SG_PRESETS.length; i++) {
       if (SG_PRESETS[i].id === sgState.id) return SG_PRESETS[i].note;
     }
-    return '게임 검색창에 붙여넣으면 조건에 맞는 포켓몬만 남아요.';
+    return '게임 검색창에 붙여넣으면 조건에 맞는 포켓몬만 남는단다.';
   }
 
   function renderSg() {
     var codeEl = $('#sg-code'), noteEl = $('#sg-note');
     if (!codeEl) return;
     var code = sgBuild();
-    codeEl.textContent = code || '조건을 하나 이상 골라 주세요';
+    codeEl.textContent = code || '조건을 하나 이상 골라 보렴';
     noteEl.textContent = sgNote();
     $$('#sg-presets .sg-preset').forEach(function (b) {
       var on = b.getAttribute('data-preset') === sgState.id;
@@ -2273,8 +2273,8 @@
 
   /* 클립보드 복사 — https가 아니거나 권한이 막혀도 되도록 예비 방법을 둔다 */
   function copyPlainText(text, okMsg) {
-    if (!text) { toast('만들 검색식이 없어요'); return; }
-    var done = function () { toast(okMsg || '복사했어요'); };
+    if (!text) { toast('만들 검색식이 없구나'); return; }
+    var done = function () { toast(okMsg || '복사했단다'); };
     var legacy = function () {
       var ta = document.createElement('textarea');
       ta.value = text;
@@ -2285,7 +2285,7 @@
       var ok = false;
       try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
       document.body.removeChild(ta);
-      if (ok) done(); else toast('검색식이 길어요. 아래 코드를 길게 눌러 복사해 주세요');
+      if (ok) done(); else toast('검색식이 길구나. 아래 코드를 길게 눌러 복사해 보렴');
     };
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(done).catch(legacy);
@@ -2338,7 +2338,7 @@
 
     var copy = $('#sg-copy');
     if (copy) copy.addEventListener('click', function () {
-      copyPlainText(sgBuild(), '검색식을 복사했어요. 게임 검색창에 붙여넣으세요');
+      copyPlainText(sgBuild(), '검색식을 복사했단다. 게임 검색창에 붙여넣어 보렴');
       track('searchgen_copy', { preset: sgState.id || 'custom' });
     });
 
@@ -2402,7 +2402,7 @@
     partyState.lists[i] = dexSearch(q, 8);
     partyState.active[i] = 0;
     if (!partyState.lists[i].length) {
-      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호로 다시 입력해 보세요.</li>';
+      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없구나. 이름·초성·도감번호로 다시 찾아보렴.</li>';
       sug.hidden = false;
       return;
     }
@@ -2494,7 +2494,7 @@
     if (!box) return;
     var mons = partyState.mons.filter(Boolean);
     if (!mons.length) {
-      box.innerHTML = '<p class="iv-empty">3마리를 넣으면 약점 타입·못 찌르는 타입·주의할 상대를 진단해 드려요.</p>';
+      box.innerHTML = '<p class="iv-empty">3마리를 넣으면 약점 타입·못 찌르는 타입·주의할 상대를 진단해 준단다.</p>';
       return;
     }
     var a = partyAnalyze(mons);
@@ -2503,11 +2503,11 @@
       return '<span class="party-chip is-weak">' +
         '<span class="type-chip" style="background:' + PGO.typeColor(d.id) + ';color:' + PGO.typeText(d.id) + '">' + d.ko + '</span>' +
         '<b>' + d.count + '/' + mons.length + '마리</b></span>';
-    }).join('') : '<span class="party-none">2마리 이상 같이 약한 타입은 없어요.</span>';
+    }).join('') : '<span class="party-none">2마리 이상 같이 약한 타입은 없단다.</span>';
 
     var uncHTML = a.uncovered.length ? a.uncovered.map(function (t) {
       return '<span class="type-chip" style="background:' + PGO.typeColor(t.id) + ';color:' + PGO.typeText(t.id) + '">' + PGO.typeKo(t.id) + '</span>';
-    }).join('') : '<span class="party-none">18개 타입을 모두 1.6배로 찌를 수 있어요.</span>';
+    }).join('') : '<span class="party-none">18개 타입을 모두 1.6배로 찌를 수 있단다.</span>';
 
     var threatHTML = a.threats.length ? a.threats.map(function (t) {
       var reasons = [];
@@ -2524,11 +2524,11 @@
           return '<span class="type-chip" style="background:' + PGO.typeColor(tt) + ';color:' + PGO.typeText(tt) + '">' + PGO.typeKo(tt) + '</span>';
         }).join('') + '</span>' +
       '</div>';
-    }).join('') : '<p class="party-none">이 리그 TOP 30에서는 눈에 띄는 위협이 없어요.</p>';
+    }).join('') : '<p class="party-none">이 리그 TOP 30에서는 눈에 띄는 위협이 없단다.</p>';
 
     var summary = '이 조합은 ' +
       (a.weak.length ? '<b>' + a.weak.slice(0, 3).map(function (d) { return d.ko; }).join('·') + '</b>에 약하고, ' : '') +
-      (a.uncovered.length ? '<b>' + a.uncovered.length + '개 타입</b>을 못 찌릅니다.' : '18개 타입을 모두 찌를 수 있습니다.');
+      (a.uncovered.length ? '<b>' + a.uncovered.length + '개 타입</b>을 못 찐단다.' : '18개 타입을 모두 찌를 수 있단다.');
 
     box.innerHTML = '<p class="party-summary">' + summary + (mons.length < 3 ? ' <span class="party-tip">(' + (3 - mons.length) + '마리 더 넣으면 더 정확해져요)</span>' : '') + '</p>' +
       '<div class="party-block"><h4 class="party-h">방어 약점 — 두 마리 이상 같이 약한 타입</h4><div class="party-chips">' + weakHTML + '</div></div>' +
@@ -2690,13 +2690,13 @@
     var res = rcCompute(boss);
 
     if (!res) {
-      verdictEl.innerHTML = '<p class="rc-empty">이 보스는 카운터 DPS 데이터가 없어 인원 계산을 할 수 없어요. 위 TOP 6 목록을 참고하세요.</p>';
+      verdictEl.innerHTML = '<p class="rc-empty">이 보스는 카운터 DPS 데이터가 없어 인원 계산을 할 수 없단다. 위 TOP 6 목록을 참고하렴.</p>';
       tableEl.innerHTML = '';
       noteEl.textContent = '';
       return;
     }
     if (res.max) {
-      verdictEl.innerHTML = '<p class="rc-empty">맥스배틀은 일반 레이드와 계산이 달라요. 같은 타입 맥스무브를 가진 다이맥스 3마리를 준비하는 쪽이 먼저입니다.</p>';
+      verdictEl.innerHTML = '<p class="rc-empty">맥스배틀은 일반 레이드와 계산이 다르단다. 같은 타입 맥스무브를 가진 다이맥스 3마리를 준비하는 쪽이 먼저지.</p>';
       tableEl.innerHTML = '';
       noteEl.textContent = '';
       return;
@@ -2712,11 +2712,11 @@
 
     var line;
     if (!firstOk) {
-      line = '이 조건에서는 6명으로도 시간이 모자라요. 레벨·날씨·프렌드 보너스를 올려 보세요.';
+      line = '이 조건에서는 6명으로도 시간이 모자란단다. 레벨·날씨·프렌드 보너스를 올려 보렴.';
     } else if (safeOk) {
-      line = '<b>' + firstOk + '명</b>부터 가능하고, <b>' + safeOk + '명</b>이면 여유 있게 깹니다.';
+      line = '<b>' + firstOk + '명</b>부터 가능하고, <b>' + safeOk + '명</b>이면 여유 있게 깬단다.';
     } else {
-      line = '<b>' + firstOk + '명</b>부터 가능하지만 시간이 꽤 빠듯해요. 한 명 더 모으면 안정적입니다.';
+      line = '<b>' + firstOk + '명</b>부터 가능하지만 시간이 꽤 빠듯하단다. 한 명 더 모으면 안정적이지.';
     }
 
     verdictEl.innerHTML =
@@ -2738,11 +2738,11 @@
       '</div>';
     }).join('') + '</div>';
 
-    noteEl.textContent = '보스 HP ' + num(res.info.hp) + ' · 제한 시간 ' + res.info.limit + '초 기준입니다. TOP 6 카운터 6마리를 모두 보유했다고 보고 ' +
-      '평균 ' + res.meanDps.toFixed(1) + ' DPS(레벨 40·개체값 15)를 바탕으로 레벨·날씨·프렌드 보너스를 반영했습니다' +
+    noteEl.textContent = '보스 HP ' + num(res.info.hp) + ' · 제한 시간 ' + res.info.limit + '초 기준이란다. TOP 6 카운터 6마리를 모두 보유했다고 보고 ' +
+      '평균 ' + res.meanDps.toFixed(1) + ' DPS(레벨 40·개체값 15)를 바탕으로 레벨·날씨·프렌드 보너스를 반영했지' +
       (rcState.weather ? ' (날씨 부스트 해당 카운터 ' + res.boostedCount + '/' + res.count + '마리)' : '') +
-      '. 교체·리로비·회피 손실 20%를 빼서 계산한 추정값이라, 실제 클리어는 파티와 플레이에 따라 달라집니다' +
-      (res.info.shield ? '. 슈퍼 메가 레이드는 방패를 깨는 메가진화가 있어야 해서 더 오래 걸릴 수 있어요.' : '.');
+      '. 교체·리로비·회피 손실 20%를 빼서 계산한 추정값이라, 실제 클리어는 파티와 플레이에 따라 달라진단다' +
+      (res.info.shield ? '. 슈퍼 메가 레이드는 방패를 깨는 메가진화가 있어야 해서 더 오래 걸릴 수 있지.' : '.');
   }
 
   function initRaidCount() {

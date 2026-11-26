@@ -4,7 +4,7 @@
    - counters: 공격 타입별 추천 딜러 (tier S/A/B)
      fast/charged: { kr, en, type } — 한국어 표기 + 영문 원문 병기
    - 스킬 조합은 2026-11 기준 통용되는 레이드 세팅이며,
-     게임 업데이트로 너프/변경될 수 있습니다.
+     게임 업데이트로 너프/변경될 수 있다.
    ========================================================= */
 (function (global) {
   'use strict';
@@ -13,67 +13,67 @@
     {
       id: 'deoxys-normal', kr: '테오키스 (노말 폼)', en: 'Deoxys (Normal)', types: ['psychic'],
       tier: '5성 레이드', status: 'now', dex: 386, avail: '11/25 06:00 ~ 12/01 22:00',
-      note: '에스퍼 단일. 공격·방어 밸런스형이라 4폼 중 가장 무난해요.'
+      note: '에스퍼 단일이란다. 공격·방어 밸런스형이라 4폼 중 가장 무난하지.'
     },
     {
       id: 'deoxys-attack', kr: '테오키스 (어택 폼)', en: 'Deoxys (Attack)', types: ['psychic'],
       tier: '5성 레이드', status: 'now', dex: 386, avail: '11/25 06:00 ~ 12/01 22:00',
-      note: '공격력이 매우 높지만 체력이 종이. 2인 클리어도 노려볼 만해요.'
+      note: '공격력이 매우 높지만 체력이 종이란다. 2인 클리어도 노려볼 만하지.'
     },
     {
       id: 'deoxys-defense', kr: '테오키스 (디펜스 폼)', en: 'Deoxys (Defense)', types: ['psychic'],
       tier: '5성 레이드', status: 'now', dex: 386, avail: '11/25 06:00 ~ 12/01 22:00',
-      note: '방어가 극단적으로 높아 시간이 오래 걸려요. 4인 이상 권장.'
+      note: '방어가 극단적으로 높아 시간이 오래 걸린단다. 4인 이상을 권하지.'
     },
     {
       id: 'deoxys-speed', kr: '테오키스 (스피드 폼)', en: 'Deoxys (Speed)', types: ['psychic'],
       tier: '5성 레이드', status: 'now', dex: 386, avail: '11/25 06:00 ~ 12/01 22:00',
-      note: '스피드 폼은 공격·방어 모두 중간값. 무난한 5성 보스예요.'
+      note: '스피드 폼은 공격·방어 모두 중간값이란다. 무난한 5성 보스지.'
     },
     {
       id: 'mega-metagross', kr: '메가메타그로스', en: 'Mega Metagross', types: ['steel', 'psychic'],
       tier: '메가 레이드', status: 'now', dex: 376, avail: '11/25 06:00 ~ 12/01 22:00',
-      note: '강철·에스퍼. 불꽃·땅·고스트·악이 1.6배로 들어가요.'
+      note: '강철·에스퍼란다. 불꽃·땅·고스트·악이 1.6배로 들어가지.'
     },
     {
       id: 'mega-clefable', kr: '메가픽시', en: 'Mega Clefable', types: ['fairy', 'flying'],
       tier: '슈퍼 메가 레이드', status: 'soon', dex: 36, avail: '11/28 14:00 ~ 17:00 (레이드 데이)',
-      note: '페어리·비행 첫 등장. 독이 1.6배로 가장 편하고, 전기·얼음·바위·강철도 약점이에요.'
+      note: '페어리·비행이 처음 나온단다. 독이 1.6배로 가장 편하고, 전기·얼음·바위·강철도 약점이지.'
     },
     {
       id: 'cryogonal', kr: '다이맥스 프리지오', en: 'Dynamax Cryogonal', types: ['ice'],
       tier: '다이맥스 (맥스배틀)', status: 'soon', dex: 615, avail: '11/30 06:00 ~ 21:00 (맥스 먼데이)', max: true,
-      note: '맥스배틀은 일반 레이드와 계산이 달라요. 같은 타입 맥스무브를 가진 다이맥스로 맞서야 합니다.'
+      note: '맥스배틀은 일반 레이드와 계산이 다르단다. 같은 타입 맥스무브를 가진 다이맥스로 맞서야 하지.'
     },
     {
       id: 'shadow-tornadus', kr: '그림자 토네로스 (화신 폼)', en: 'Shadow Tornadus', types: ['flying'],
       tier: '그림자 5성', status: 'now', dex: 641, avail: '11/16 06:00 ~ 12/01 22:00 (주말)',
-      note: '비행 단일. 전기·얼음·바위가 1.6배. 그림자라 받는 피해가 커요.'
+      note: '비행 단일이란다. 전기·얼음·바위가 1.6배로 들어가고, 그림자라 받는 피해도 크지.'
     },
     {
       id: 'regidrago', kr: '레지드래고', en: 'Regidrago', types: ['dragon'],
       tier: '5성 레이드', status: 'soon', dex: 895, avail: '12/02 06:00 ~ 12/08 22:00',
-      note: '드래곤 단일. 얼음·드래곤·페어리가 약점이고 체력이 두툼해요.'
+      note: '드래곤 단일이고 체력이 두툼하단다. 얼음·드래곤·페어리로 찔러 보렴.'
     },
     {
       id: 'mega-slowbro', kr: '메가야도란', en: 'Mega Slowbro', types: ['water', 'psychic'],
       tier: '메가 레이드', status: 'soon', dex: 80, avail: '12/02 06:00 ~ 12/08 22:00',
-      note: '물·에스퍼. 전기·풀·벌레·고스트·악이 약점.'
+      note: '물·에스퍼란다. 전기·풀·벌레·고스트·악이 약점이지.'
     },
     {
       id: 'shadow-dialga', kr: '그림자 디아루가', en: 'Shadow Dialga', types: ['steel', 'dragon'],
       tier: '그림자 5성', status: 'soon', dex: 483, avail: '12/02 06:00 ~ 2027/01/05 22:00',
-      note: '강철·드래곤. 격투가 2.56배로 가장 강하고, 땅도 1.6배로 들어갑니다.'
+      note: '강철·드래곤이란다. 격투가 2.56배로 가장 강하고, 땅도 1.6배로 들어가지.'
     },
     {
       id: 'palkia', kr: '펄기아', en: 'Palkia', types: ['water', 'dragon'],
       tier: '참고 (현재 로테이션 아님)', status: 'ref', dex: 484, avail: '로테이션 대기',
-      note: '물·드래곤. 드래곤과 페어리가 약점이에요. 다음 재등장 때를 대비해 두세요.'
+      note: '물·드래곤이고 드래곤과 페어리가 약점이란다. 다음 재등장 때를 대비해 두렴.'
     },
     {
       id: 'mega-dragonite', kr: '메가망나뇽', en: 'Mega Dragonite', types: ['dragon', 'flying'],
       tier: '참고 (출시 정보 미확정)', status: 'ref', dex: 149, avail: '미확정',
-      note: '드래곤·비행 조합이면 얼음이 2.56배로 가장 강한 카운터가 됩니다.'
+      note: '드래곤·비행 조합이면 얼음이 2.56배로 가장 강한 카운터가 된단다.'
     }
   ];
 
@@ -230,7 +230,7 @@
 
   /* 다이맥스(맥스배틀) 보스용 안내 — 맥스무브는 다이맥스 포켓몬의 타입을 따름 */
   var MAX_TIPS = {
-    'ice': '얼음 보스에게는 불꽃·격투·바위·강철 맥스무브가 강해요. 다이맥스 리자몽(불꽃)·다이맥스 루카리오(격투)를 추천!'
+    'ice': '얼음 보스에게는 불꽃·격투·바위·강철 맥스무브가 강하단다. 다이맥스 리자몽(불꽃)·다이맥스 루카리오(격투)를 추천하지!'
   };
 
   global.HUB_BOSSES = BOSSES;
