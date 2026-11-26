@@ -1,11 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 오박사의 포켓몬 백과사전 (포켓몬고 허브) — https://pogo-obaksa.github.io/ -->
+<!-- 오박사의 포켓몬 백과사전 (포켓몬고 허브) — https://pogo-obaksa.github.io/
+     홈 1 + 공략 12편 + 정책 3 = 총 16개 URL. tools/build_guide_pages.py 가 생성한다. -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://pogo-obaksa.github.io/</loc>
     <lastmod>2026-11-26</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/stardust-priority.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/shadow-purify.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/mega-beginner.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/shiny-trade-iv.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/type-tier-top10.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/gbl-pvp-beginner.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/max-battle-guide.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/go-pass-guide.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/returning-trainer-week1.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/stardust-candy-farming.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/raid-catch-party.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://pogo-obaksa.github.io/guide/pokecoin-priority.html</loc>
+    <lastmod>2026-11-26</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://pogo-obaksa.github.io/privacy.html</loc>

@@ -11,7 +11,8 @@ web/pokemongo-hub/
 ├── privacy.html          # 개인정보처리방침(독립 URL)
 ├── terms.html            # 이용약관(독립 URL)
 ├── disclaimer.html       # 면책조항(독립 URL)
-├── sitemap.xml           # 검색·애드센스 봇용 사이트맵
+├── sitemap.xml           # 검색·애드센스 봇용 사이트맵 (홈 1 + 공략 12 + 정책 3 = 16 URL, 자동 생성)
+├── guide/                # 공략 12편 개별 정적 페이지 (/guide/<slug>.html, 자동 생성)
 ├── styles.css            # 라이트 테마(스카이·민트·몬스터볼 레드) · 모바일 퍼스트 반응형
 ├── app.js                # 카운트다운·카운터 계산·타입 상성·육성 계산·도감 검색·가이드 라우팅 로직
 ├── data/
@@ -24,6 +25,7 @@ web/pokemongo-hub/
 │   ├── og-obaksa.jpg     # 링크 공유 대표 썸네일(og:image · 1024×1024 JPEG)
 │   └── events/           # 시즌·메인 이벤트·GO패스 카드용 공식 배너 썸네일 160×160 JPEG (파일명 = 이벤트 id)
 ├── tools/build_pokedex.py # 도감 데이터 생성 스크립트 (pogoapi.net + PokeAPI → data/pokedex.js)
+├── tools/build_guide_pages.py # 공략 12편 → guide/*.html + sitemap.xml 생성 스크립트
 ├── tests/verify.py       # headless chromium 자동 검증(로직 + 폰트·테마 + 도감 + 제휴 배너 + 스크린샷)
 ├── preview_mobile.png    # 390×844 미리보기
 ├── preview_desktop.png   # 1280×800 미리보기
@@ -138,12 +140,28 @@ sh repos/deploy-pokemongo-hub.sh
   `이 배너는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.`
 - 문구·이미지는 외부 이미지 요청 없이 CSS·텍스트만 씁니다(로드 실패·겹침 위험 없음, 라이트 테마 유지).
 
+## 공략 12편 개별 페이지 (`guide/*.html`)
+
+공략 본문은 `data/guides.js` 한 곳에만 있고, 배포용 정적 페이지와 사이트맵은 그 데이터에서 생성합니다.
+
+```bash
+# guides.js 를 고친 뒤에는 항상 다시 생성 (guide/*.html 12개 + sitemap.xml 16 URL)
+LD_LIBRARY_PATH=/workspace/scratch/sysroot/usr/lib/x86_64-linux-gnu python3 tools/build_guide_pages.py
+```
+
+- 실제 앱(app.js)으로 각 글을 렌더한 뒤 버튼을 링크로 바꿔 저장하므로, 화면과 글이 어긋나지 않습니다.
+- 각 페이지에는 고유 `<title>`·`meta description`·`canonical`·애드센스 스크립트·JSON-LD(Article+Breadcrumb)·
+  헤더/푸터·**자바스크립트 없이도 읽히는 본문 전체**·목차 앵커·이전/다음 글·공략 12편 목록이 들어갑니다.
+- 허브의 공략 카드는 `<a href="guide/<slug>.html">` 이라 자바스크립트가 없어도(그리고 새 탭 클릭에도) 열립니다.
+  허브 안에서는 클릭을 가로채 `#guide/<slug>` 해시로 바로 열리므로 기존 동작은 그대로입니다.
+- 문의처: `privacy.html`·`terms.html`·`disclaimer.html` 3개 정책 문서에 운영자 이메일 **redfilm24@gmail.com** 이 명시돼 있습니다.
+
 ## 애드센스 붙이기 (추후)
 
 1. 애드센스를 함께 쓰려면 `index.html`에 남는 자리를 새로 만들어 `<ins class="adsbygoogle">` 코드를 넣습니다.
 2. `ads.txt`에 발급받은 `google.com, pub-XXXXXXXX, DIRECT, f08c47fec0942fa0` 한 줄을 넣습니다.
-3. 심사 전 확인: `개인정보처리방침`(모달에 구현됨) · `이용약관` · `문의` 페이지가 실제로 열려야 하고,
-   **문의처는 실제 연락 가능한 주소로 바꿔 주세요**(현재는 블로그·인스타 채널로 안내).
+3. 심사 전 확인: `개인정보처리방침` · `이용약관` · `면책조항` 이 각각 독립 URL로 열려야 하고,
+   문의처에는 운영자 이메일(redfilm24@gmail.com)과 블로그·인스타그램 채널이 함께 적혀 있습니다.
 
 ## 검증
 
@@ -156,6 +174,8 @@ python3 tests/verify.py
   KST 변환·카운트다운, 보스별 약점·카운터, 도감 검색(리자몽·피카·ㄹㅈㅁ·149·#006)·타입/이로치 필터·상세 시트·이로치 토글,
   5개 탭 렌더, 일정 카드 포켓몬 일러스트, 제휴 배너 4곳(링크·rel·고지 문구·`partner_click`),
   가이드 12편(목록·개별 글·본문 3,000자 이상·표 2개 이상·체크리스트·내부 이동 버튼 3개·해시/쿼리 진입·`guide_view`),
+  공략 정적 페이지 12개(고유 title·description·canonical·애드센스·JSON-LD·자바스크립트를 끈 상태의 본문 3,000자·표·목차 앵커·12편 상호 링크),
+  `sitemap.xml` 16개 URL, 정책 3개 문서의 운영자 이메일,
   타입별 티어표(18타입 표 18행, TOP 10 표 4개 각 10행),
   모바일/데스크톱 가로 넘침, Pretendard 웹폰트 로드와 라이트 테마 기본값까지 자동 검사합니다.
 

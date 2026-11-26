@@ -1128,7 +1128,9 @@
   function guidePad(n) { return (n < 10 ? '0' : '') + n; }
 
   function guideCardHTML(g) {
-    return '<button class="guide-card" type="button" data-guide-slug="' + g.slug + '" aria-label="' + g.title + ' 읽기">' +
+    /* 실제 정적 페이지(guide/<slug>.html)로 가는 링크 — 자바스크립트가 없어도 열린다.
+       클릭하면 아래 위임 핸들러가 preventDefault 후 앱 안에서 바로 연다. */
+    return '<a class="guide-card" href="guide/' + g.slug + '.html" data-guide-slug="' + g.slug + '" aria-label="' + g.title + ' 읽기">' +
       '<span class="guide-card-top">' +
         '<span class="guide-num">' + guidePad(g.no) + '</span>' +
         '<span class="guide-card-emoji" aria-hidden="true">' + g.emoji + '</span>' +
@@ -1141,7 +1143,7 @@
         '<span class="guide-tags">' + g.tags.map(function (t) { return '<span class="guide-tag">#' + t + '</span>'; }).join('') + '</span>' +
         '<span class="guide-go">읽기 <span aria-hidden="true">→</span></span>' +
       '</span>' +
-    '</button>';
+    '</a>';
   }
 
   function renderGuideList() {
@@ -1356,7 +1358,13 @@
       var tool = e.target.closest('[data-goto]');
       if (tool) { goFromGuide(tool); return; }
       var card = e.target.closest('[data-guide-slug]');
-      if (card) { openGuide(card.getAttribute('data-guide-slug')); return; }
+      if (card) {
+        /* 새 탭·새 창으로 열기(수정키 클릭)는 브라우저 기본 동작에 맡긴다 */
+        if (card.tagName === 'A' && (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0)) return;
+        e.preventDefault();
+        openGuide(card.getAttribute('data-guide-slug'));
+        return;
+      }
     });
   }
 
@@ -1397,7 +1405,7 @@
         '<h3>5. 이용자의 권리</h3>' +
         '<p>이용자는 언제든지 자신의 정보 처리에 관한 열람·정정·삭제를 요청할 수 있습니다.</p>' +
         '<h3>6. 문의</h3>' +
-        '<p>개인정보 관련 문의는 하단 <strong>문의</strong> 메뉴를 통해 접수해 주세요.</p>' +
+        '<p>개인정보 관련 문의는 운영자 이메일 <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a> 또는 하단 <strong>문의</strong> 메뉴로 접수해 주세요.</p>' +
         '<p style="color:var(--muted)">시행일: 2026년 11월 25일</p>'
     },
     terms: {
@@ -1421,6 +1429,7 @@
       body:
         '<p>일정 오류 제보, 기능 건의, 광고·제휴 문의는 아래 채널로 보내 주세요. 확인 후 순서대로 답변드립니다.</p>' +
         '<ul>' +
+        '<li><strong>이메일</strong> — <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a></li>' +
         '<li><strong>블로그</strong> — blog.naver.com/seopp 의 최신 글 댓글</li>' +
         '<li><strong>인스타그램</strong> — @obak.sa DM</li>' +
         '</ul>' +
