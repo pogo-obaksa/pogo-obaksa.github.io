@@ -311,6 +311,15 @@ main{
   filter:drop-shadow(0 1px 2px rgba(15,23,42,.14));
 }
 .event-emoji .event-emoji-fallback{font-size:23px;line-height:1;}
+/* 시즌·메인 이벤트·GO패스: 공식 배너를 꽉 채운 둥근 썸네일로 */
+.event-emoji.has-thumb{
+  padding:0;overflow:hidden;background:#F1F7FD;
+  border-color:#D8E6F4;box-shadow:inset 0 0 0 1px rgba(255,255,255,.5),0 1px 3px rgba(2,132,199,.10);
+}
+.event-emoji.has-thumb img{
+  width:100%;height:100%;object-fit:cover;object-position:center;display:block;
+  border-radius:13px;
+}
 .event-card{grid-template-columns:48px 1fr;}
 .event-body{min-width:0;}
 .event-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:3px;}

@@ -204,10 +204,15 @@
   var eventFilter = 'all';
   var renderedEventIds = {};
 
-  /* 포켓몬이 주인공인 일정은 공식 일러스트를 아이콘으로 쓰고, 실패하면 기존 이모지로 돌아간다 */
+  /* 포켓몬이 주인공인 일정은 공식 일러스트를 아이콘으로 쓰고, 실패하면 기존 이모지로 돌아간다.
+     주인공 포켓몬이 없는 시즌·메인 이벤트·GO패스는 공식 배너 썸네일(ev.thumb)을 쓴다. */
   function eventIconHTML(ev) {
-    var fallback = '<span class="event-emoji-fallback"' + (ev.pokemonId ? ' style="display:none"' : '') + '>' +
+    var fallback = '<span class="event-emoji-fallback"' + ((ev.pokemonId || ev.thumb) ? ' style="display:none"' : '') + '>' +
       ev.emoji + '</span>';
+    if (ev.thumb) return '<div class="event-emoji has-thumb" aria-hidden="true">' +
+      '<img src="' + ev.thumb + '" alt="" loading="lazy" width="48" height="48" ' +
+        'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'">' +
+      fallback + '</div>';
     if (!ev.pokemonId) return '<div class="event-emoji" aria-hidden="true">' + fallback + '</div>';
     return '<div class="event-emoji has-mon" aria-hidden="true">' +
       '<img src="' + dexArt(ev.pokemonId) + '" alt="" loading="lazy" ' +

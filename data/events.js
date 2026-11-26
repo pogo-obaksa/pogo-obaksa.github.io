@@ -7,6 +7,16 @@
    pokemonId: 이벤트 주인공 포켓몬 도감번호. 있으면 카드 아이콘이 공식 일러스트로 바뀌고,
               로드에 실패하면 emoji 로 자동 폴백합니다. 메가 포켓몬은 PokeAPI 폼 번호
               (메가메타그로스 10076 · 메가야도란 10071 · 메가픽시 10278)를 씁니다.
+   thumb: 주인공 포켓몬이 없는 시즌·메인 이벤트·GO패스 카드용 공식 배너 썸네일.
+          assets/events/{id}.jpg (160×160, 배너를 중앙 크롭) — 로드 실패 시 emoji 폴백.
+          ⓘ 썸네일 원본(공식 배너, leekduck.com 경유 배포본)을 새로 받을 때:
+            - 시즌 24 Twilight Trails : article-images/2026/2026-09-08-season-24-twilight-trails/season-24-twilight-trails.jpg
+            - 시즌 25 Daydream Destinations : article-images/2026/2026-12-01-season-25-daydream-destinations/season-25-daydream-destinations.jpg
+            - 트로피컬 파라다이스 : events/tropical-paradise-2026.jpg
+            - GO 패스 12월 : article-images/2026/2026-12-01-go-pass-december-2026/go-pass-december-2026.jpg
+            - 맥스배틀 데이(12/5) : article-images/2026/2026-12-05-gigantamax-inteleon-max-battle-day-2026/gigantamax-inteleon-max-battle-day.jpg
+            - 12월 커뮤니티 데이 : article-images/2026/2026-12-12-december-communityday2026/december-2026-community-day.jpg
+          (앞의 경로는 https://cdn.leekduck.com/assets/img/ 아래)
    ========================================================= */
 (function (global) {
   'use strict';
@@ -22,6 +32,7 @@
       badge: o.badge || '',
       emoji: o.emoji || '📅',
       pokemonId: o.pokemonId || null,
+      thumb: o.thumb || '',
       desc: o.desc || '',
       tip: o.tip || '',
       priority: o.priority || 0,
@@ -94,25 +105,25 @@
       source: 'https://leekduck.com/events/max-mondays-2026-11-30/'
     }),
     E('twilight-trails-end', '시즌 24 「Twilight Trails」 종료', null, '2026-12-01T10:00:00+09:00', 'event', {
-      badge: '시즌', emoji: '🌆', priority: 35,
+      badge: '시즌', emoji: '🌆', thumb: 'assets/events/twilight-trails-end.jpg', priority: 35,
       desc: '황혼 시즌이 12월 1일 10:00에 끝납니다. 시즌 리서치는 종료와 함께 사라져요.',
       tip: '시즌 리서치·GO패스 보상은 종료 전에 꼭 수령하세요. 안 받으면 그대로 사라집니다.',
       source: 'https://leekduck.com/events/season-24-twilight-trails/'
     }),
     E('daydream-destinations', '새 시즌 「Daydream Destinations」 개막', '2026-12-01T10:00:00+09:00', '2027-03-01T10:00:00+09:00', 'event', {
-      badge: '새 시즌', emoji: '🌅', priority: 80,
+      badge: '새 시즌', emoji: '🌅', thumb: 'assets/events/daydream-destinations.jpg', priority: 80,
       desc: '12월 1일 10:00부터 2027년 3월 1일 10:00까지 이어지는 새 시즌.',
       tip: '시즌 첫날은 야생·레이드 로테이션이 한 번에 바뀌니 10시 전후로 접속해 두세요.',
       source: 'https://leekduck.com/events/season-24-twilight-trails/'
     }),
     E('tropical-paradise', '트로피컬 파라다이스', '2026-12-01T10:00:00+09:00', '2026-12-07T20:00:00+09:00', 'event', {
-      badge: '메인 이벤트', emoji: '🏝️', priority: 45,
+      badge: '메인 이벤트', emoji: '🏝️', thumb: 'assets/events/tropical-paradise.jpg', priority: 45,
       desc: '새 시즌 개막과 함께 시작되는 첫 이벤트.',
       tip: '이벤트 시작과 동시에 GO패스 12월 시즌도 열립니다.',
       source: 'https://leekduck.com/events/tropical-paradise-2026/'
     }),
     E('go-pass-dec', 'GO 패스: 12월', '2026-12-01T10:00:00+09:00', '2027-01-05T10:00:00+09:00', 'event', {
-      badge: 'GO 패스', emoji: '🎟️', priority: 30,
+      badge: 'GO 패스', emoji: '🎟️', thumb: 'assets/events/go-pass-dec.jpg', priority: 30,
       desc: '12월 GO 패스 진행. 매일 미션을 채워 보상 트랙을 올리세요.',
       tip: 'GO 패스 델럭스는 별의모래·XP 보너스가 붙어 육성 효율이 확 올라갑니다.',
       source: 'https://leekduck.com/events/go-pass-december-2026/'
@@ -148,7 +159,7 @@
       source: 'https://leekduck.com/events/pokemonspotlighthour2026-12-03/'
     }),
     E('max-battle-day', '맥스배틀 데이', '2026-12-05T14:00:00+09:00', '2026-12-05T17:00:00+09:00', 'max', {
-      badge: '맥스배틀 데이', emoji: '💥', priority: 60,
+      badge: '맥스배틀 데이', emoji: '💥', thumb: 'assets/events/max-battle-day.jpg', priority: 60,
       desc: '14:00~17:00 파워스팟 집중 개방. 다이맥스 보스가 몰려옵니다.',
       tip: '맥스무브 게이지를 채우려면 3마리 모두 다이맥스로 맞춰야 해요.',
       source: 'https://leekduck.com/events/max-battle-day-december-2026/'
@@ -160,7 +171,7 @@
       source: 'https://leekduck.com/events/max-mondays-2026-12-07/'
     }),
     E('dec-community-day', '12월 커뮤니티 데이 2026', '2026-12-12T14:00:00+09:00', '2026-12-13T17:00:00+09:00', 'community', {
-      badge: '커뮤니티 데이', emoji: '🎉', priority: 75,
+      badge: '커뮤니티 데이', emoji: '🎉', thumb: 'assets/events/dec-community-day.jpg', priority: 75,
       desc: '12월 12일 14:00 ~ 13일 17:00 (이틀간) 대상 포켓몬 대량 발생.',
       tip: '커뮤니티 데이 전용 기술은 진화 시간 안에만 배울 수 있어요. 놓치면 끝.',
       source: 'https://leekduck.com/events/december-communityday2026/'
