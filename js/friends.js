@@ -250,6 +250,22 @@ function render() {
 
 function tick() {
   refreshCooldown();
+  const list = $('#fr-list');
+  if (!list) return;
+  const rows = visibleDocs();
+  const cards = Array.prototype.slice.call(list.querySelectorAll('.fr-card'));
+  const sameCards = cards.length === rows.length && rows.every((d, i) => cards[i].getAttribute('data-id') === String(d.id));
+  /* 카드 구성이 그대로면 남은 시간만 바꾼다 (QR·복사 상태를 유지) */
+  if (sameCards) {
+    rows.forEach((d, i) => {
+      const el = cards[i].querySelector('.fr-remain');
+      if (!el) return;
+      const left = Number(d.expiresAt) - Date.now();
+      el.textContent = remainText(left);
+      el.classList.toggle('is-urgent', left < 10 * 60000);
+    });
+    return;
+  }
   render();
 }
 
@@ -372,6 +388,7 @@ if (db) {
 }
 
 setInterval(tick, 15000);
+setInterval(function () { if (Date.now() < state.coolingUntil) refreshCooldown(); }, 1000);
 render();
 window.__frReady = true;
 window.__friends = { state, render, visibleDocs, formatCode, remainText };

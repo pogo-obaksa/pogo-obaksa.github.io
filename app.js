@@ -1125,14 +1125,17 @@
 
   function revGoalHTML(target, from, have) {
     var need = revNeed(from, target);
+    var already = from >= target - 0.0001;
     var shortDust = Math.max(0, need.dust - have.dust);
     var shortCandy = Math.max(0, need.candy - have.candy);
     var shortXl = Math.max(0, need.xl - have.xl);
-    var allOk = shortDust === 0 && shortCandy === 0 && shortXl === 0;
+    var allOk = already || (shortDust === 0 && shortCandy === 0 && shortXl === 0);
     var bits = [];
-    if (allOk) {
+    if (already) {
+      bits.push('이미 ' + levelLabel(from) + ' — ' + target + '레벨을 넘겼어');
+    } else if (allOk) {
       bits.push('필요 <strong>' + num(need.dust) + '</strong> 모래 · 사탕 <strong>' + num(need.candy) + '</strong>' +
-        (need.xl ? ' · XL <strong>' + num(need.xl) + '</strong>' : '') + ' — 도달 가능');
+        (need.xl ? ' · XL <strong>' + num(need.xl) + '</strong>' : '') + ' — 바로 도달 가능');
     } else {
       if (shortDust) bits.push('모래 <span class="short">' + num(shortDust) + '</span>');
       if (shortCandy) bits.push('사탕 <span class="short">' + num(shortCandy) + '</span>');
@@ -1140,8 +1143,8 @@
     }
     return '<div class="rev-goal ' + (allOk ? 'is-ok' : 'is-short') + '">' +
       '<div class="rev-goal-head"><span class="rev-goal-title">' + target + '레벨까지</span>' +
-        '<span class="rev-goal-badge">' + (allOk ? '가능' : '부족') + '</span></div>' +
-      '<p class="rev-goal-need">' + (allOk ? bits.join(' · ') : bits.join(' · ') + ' 부족') + '</p>' +
+        '<span class="rev-goal-badge">' + (already ? '통과' : (allOk ? '가능' : '부족')) + '</span></div>' +
+      '<p class="rev-goal-need">' + (allOk ? bits.join(' · ') : bits.join(' · ') + ' 모자라') + '</p>' +
     '</div>';
   }
 
@@ -1155,10 +1158,17 @@
 
     var head;
     if (reach.level <= from + 0.0001) {
+      /* 어느 재화가 발목을 잡는지 정확히 짚어 준다 (XL사탕 0개면 모래가 넘쳐도 40레벨에서 멈춘다) */
+      var step = revNeed(from, from + 0.5);
+      var lack = [];
+      if (step.dust > have.dust) lack.push('모래 ' + num(step.dust - have.dust) + '개');
+      if (step.candy > have.candy) lack.push('사탕 ' + num(step.candy - have.candy) + '개');
+      if (step.xl > have.xl) lack.push('XL사탕 ' + num(step.xl - have.xl) + '개');
       head = '<span class="rev-hero-label">지금 가진 자원으로는</span>' +
         '<strong class="rev-hero-level">' + levelLabel(from) + ' 그대로</strong>' +
-        '<span class="rev-hero-sub">강화 한 번(모래 ' + num(revNeed(from, from + 0.5).dust) + ' · 사탕 ' +
-          num(revNeed(from, from + 0.5).candy) + ')도 부족해요. 모래나 사탕을 조금만 더 모아 보세요.</span>';
+        '<span class="rev-hero-sub">강화 한 번에 모래 ' + num(step.dust) + ' · 사탕 ' + num(step.candy) +
+          (step.xl ? ' · XL사탕 ' + num(step.xl) : '') + '이 들어. ' +
+          (lack.length ? lack.join(' · ') + '만 더 모으면 ' + levelLabel(from + 0.5) + '까지 갈 수 있어.' : '') + '</span>';
     } else {
       head = '<span class="rev-hero-label">지금 가진 자원으로 도달 가능</span>' +
         '<strong class="rev-hero-level">' + levelLabel(reach.level) + '</strong>' +
@@ -1176,7 +1186,8 @@
       var cp = cpm ? cpAt(p, a, d, s, cpm) : 0;
       var cp40 = cpAt(p, a, d, s, CPM_TABLE[40]);
       var cp50 = cpAt(p, a, d, s, CPM50);
-      head += '<span class="rev-hero-cp">' + monSpriteHTML(p.id, '', 26) + '<span>' + p.n + ' 예상 CP</span>' +
+      var reachLabel = reach.level > from + 0.0001 ? '예상 CP' : '지금 CP';
+      head += '<span class="rev-hero-cp">' + monSpriteHTML(p.id, '', 26) + '<span>' + p.n + ' ' + reachLabel + '</span>' +
         '<b>' + num(cp) + '</b> <span style="opacity:.85;font-weight:700">(Lv.40 ' + num(cp40) + ' · Lv.50 ' + num(cp50) + ')</span></span>';
     }
 
