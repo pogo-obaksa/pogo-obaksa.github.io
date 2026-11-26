@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모바일 폭 넘침 검사 (임시)</title>
+<style>
+  body{font-family:system-ui,sans-serif;margin:0;padding:12px;background:#0f172a;color:#e2e8f0;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;}
+  iframe{border:2px solid #38bdf8;background:#fff;}
+  pre{white-space:pre-wrap;font-size:12px;}
+</style>
+</head>
+<body>
+<h1>모바일 폭 넘침 검사</h1>
+<div class="row" id="frames"></div>
+<pre id="out">측정 중…</pre>
+<script>
+  var targets = [
+    { name: 'index-events', src: '/?mcheck=1#events', w: 360 },
+    { name: 'index-powerup', src: '/?mcheck=1#powerup', w: 390 },
+    { name: 'friends', src: '/friends.html?mcheck=1', w: 360 },
+    { name: 'friends390', src: '/friends.html?mcheck=2', w: 390 }
+  ];
+  var results = [];
+  var done = 0;
+  var box = document.getElementById('frames');
+  targets.forEach(function (t) {
+    var f = document.createElement('iframe');
+    f.width = t.w;
+    f.height = 900;
+    f.src = t.src;
+    f.setAttribute('data-name', t.name);
+    f.onload = function () {
+      setTimeout(function () {
+        try {
+          var doc = f.contentDocument;
+          var de = doc.documentElement;
+          var sw = de.scrollWidth, cw = de.clientWidth;
+          var over = [];
+          doc.querySelectorAll('body *').forEach(function (el) {
+            var r = el.getBoundingClientRect();
+            if (r.width && r.right > cw + 1) {
+              over.push({ tag: el.tagName.toLowerCase(), cls: el.className && String(el.className).slice(0, 40), right: Math.round(r.right) });
+            }
+          });
+          results.push({
+            name: t.name, width: t.w, scrollWidth: sw, clientWidth: cw,
+            overflow: sw - cw, offenders: over.slice(0, 8), offendersTotal: over.length
+          });
+        } catch (e) {
+          results.push({ name: t.name, error: String(e) });
+        }
+        done++;
+        document.getElementById('out').textContent = JSON.stringify(results, null, 2);
+      }, 1800);
+    };
+    box.appendChild(f);
+  });
+</script>
+</body>
+</html>

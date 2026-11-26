@@ -1132,7 +1132,9 @@
     var allOk = already || (shortDust === 0 && shortCandy === 0 && shortXl === 0);
     var bits = [];
     if (already) {
-      bits.push('이미 ' + levelLabel(from) + ' — ' + target + '레벨을 넘겼어');
+      bits.push(from <= target + 0.0001
+        ? '이미 ' + levelLabel(from) + ' — ' + target + '레벨이야'
+        : '이미 ' + levelLabel(from) + ' — ' + target + '레벨을 넘겼어');
     } else if (allOk) {
       bits.push('필요 <strong>' + num(need.dust) + '</strong> 모래 · 사탕 <strong>' + num(need.candy) + '</strong>' +
         (need.xl ? ' · XL <strong>' + num(need.xl) + '</strong>' : '') + ' — 바로 도달 가능');
@@ -1166,7 +1168,8 @@
       if (step.xl > have.xl) lack.push('XL사탕 ' + num(step.xl - have.xl) + '개');
       head = '<span class="rev-hero-label">지금 가진 자원으로는</span>' +
         '<strong class="rev-hero-level">' + levelLabel(from) + ' 그대로</strong>' +
-        '<span class="rev-hero-sub">강화 한 번에 모래 ' + num(step.dust) + ' · 사탕 ' + num(step.candy) +
+        '<span class="rev-hero-sub">강화 한 번에 모래 ' + num(step.dust) +
+          (step.candy ? ' · 사탕 ' + num(step.candy) : '') +
           (step.xl ? ' · XL사탕 ' + num(step.xl) : '') + '이 들어. ' +
           (lack.length ? lack.join(' · ') + '만 더 모으면 ' + levelLabel(from + 0.5) + '까지 갈 수 있어.' : '') + '</span>';
     } else {
