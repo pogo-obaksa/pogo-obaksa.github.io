@@ -17,8 +17,8 @@
 <!-- Google AdSense — 사이트 소유권 확인 · 광고 게재 (게시자 ID pub-2879207392914466) -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2879207392914466" crossorigin="anonymous"></script>
 <title>오박사의 포켓몬 백과사전 | 포켓몬고 일정·한글 도감·레이드 카운터·육성 계산기</title>
-<meta name="description" content="포켓몬고 한글 도감(이름·초성·도감번호 검색, 이로치·최대 CP·기술), 한국 시간 일정 카운트다운, 레이드 보스 약점과 추천 카운터, 별의모래·사탕 육성 계산기, 타입 상성표, 초보·복귀용 에버그린 공략 12편까지 한 화면에서.">
-<meta name="keywords" content="포켓몬고 도감, 포켓몬고 한글 도감, 포켓몬고 일정, 레이드 카운터, 타입 상성, 별의모래 계산기, 육성 계산기, 테오키스, 메가메타그로스">
+<meta name="description" content="포켓몬고 한글 도감(이름·초성·도감번호 검색, 이로치·최대 CP·기술), 한국 시간 일정 카운트다운, 레이드 보스 약점과 추천 카운터 TOP 6(졸업 스킬), 배틀리그 IV 순위 계산기·PvP 티어 TOP 30, 별의모래·사탕 육성 계산기, 타입 상성표, 초보·복귀용 공략 12편까지 한 화면에서.">
+<meta name="keywords" content="포켓몬고 도감, 포켓몬고 한글 도감, 포켓몬고 일정, 레이드 카운터, 배틀리그 IV, PvP 티어, 슈퍼리그 1500, 하이퍼리그 2500, 타입 상성, 별의모래 계산기, 육성 계산기, 테오키스, 메가메타그로스">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#F4F7FA">
 <meta property="og:type" content="website">
@@ -41,7 +41,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23f5f7ff' stroke='%230b1020' stroke-width='8'/%3E%3Cpath d='M6 50h88' stroke='%230b1020' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%230b1020'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23f5f7ff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-<link rel="stylesheet" href="styles.css?v=20261126cd4">
+<link rel="stylesheet" href="styles.css?v=20261126ef1">
 </head>
 <body>
 
@@ -71,6 +71,9 @@
     </button>
     <button class="tab" role="tab" id="tabbtn-pokedex" aria-selected="false" aria-controls="tab-pokedex" data-tab="pokedex" tabindex="-1">
       <span class="tab-emoji">📘</span><span>도감</span>
+    </button>
+    <button class="tab" role="tab" id="tabbtn-tier" aria-selected="false" aria-controls="tab-tier" data-tab="tier" tabindex="-1">
+      <span class="tab-emoji">🏆</span><span>티어</span>
     </button>
     <button class="tab" role="tab" id="tabbtn-powerup" aria-selected="false" aria-controls="tab-powerup" data-tab="powerup" tabindex="-1">
       <span class="tab-emoji">⚡</span><span>육성</span>
@@ -178,7 +181,13 @@
 
       <h4 class="sub-head">추천 카운터 TOP 6</h4>
       <div class="counter-list" id="boss-counters"></div>
-      <p class="fineprint" style="margin-top:10px">기술명은 영문 원문을 함께 표시했어요. 게임 내 번역 표기와 조금 다를 수 있고, 업데이트로 기술 위력이 바뀌면 순위도 달라질 수 있습니다.</p>
+      <p class="fineprint" style="margin-top:10px">
+        <strong>졸업 스킬</strong>은 그 포켓몬이 쓸 수 있는 조합 중 사이클 DPS가 가장 높은 노말·스페셜 기술이고,
+        <span class="elite">ⓔ</span>는 엘리트 기술(기술머신·이벤트 한정)입니다. 순위는 40레벨·개체값 15 기준
+        사이클 딜량과 내구를 합친 종합 지수라서, 실제 레이드에서는 보스의 기술과 파티 구성에 따라 달라질 수 있어요.
+        메가진화 포켓몬의 같은 타입 파티 버프(1.3배)는 넣지 않고 각자 단독 화력만 계산했습니다.
+        기술 위력·상성은 pogoapi.net 공개 데이터(2026-11)를 썼고, 게임 업데이트로 수치가 바뀌면 순위도 달라집니다.
+      </p>
 
       <div class="max-tip" id="max-tip" hidden></div>
     </article>
@@ -293,6 +302,85 @@
         40레벨부터는 사탕 대신 <strong>XL사탕</strong>이 들어갑니다(모래는 계속 소모). 1→40레벨 총비용은 별의모래 270,000 · 사탕 304개,
         40→50레벨은 별의모래 250,000 · XL사탕 296개가 맞습니다.
         이로치(반짝반짝)는 육성 비용 할인과 아무 관련이 없고, 할인은 <strong>럭키</strong> 포켓몬(모래 50%)에만 붙어요.
+      </p>
+    </article>
+
+    <article class="panel" id="iv-panel">
+      <h3 class="panel-title">🏅 배틀리그 IV 순위 계산기</h3>
+      <p class="panel-desc">
+        공격·방어·체력 개체값을 넣으면 <strong>4,096가지(0/0/0~15/15/15) 조합</strong> 중 스탯 프로덕트 순위를 계산합니다.
+        배틀리그는 CP 상한에 맞춰 레벨을 올리기 때문에, 같은 CP라도 방어·체력이 높은 개체가 더 강합니다.
+      </p>
+
+      <div class="iv-search">
+        <label class="iv-search-box" for="iv-q">
+          <span class="iv-search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="iv-q" class="iv-input" autocomplete="off" spellcheck="false"
+                 placeholder="포켓몬 이름 · 초성 · 도감번호 (예: 마릴, ㅁㄹ, 184)" aria-label="배틀리그 IV 순위를 계산할 포켓몬 검색">
+        </label>
+        <ul class="iv-suggest" id="iv-suggest" hidden></ul>
+        <p class="iv-picked" id="iv-picked" hidden></p>
+      </div>
+
+      <div class="seg-group iv-league" id="iv-league" role="group" aria-label="리그 선택">
+        <button class="seg is-active" type="button" data-cap="1500">슈퍼리그 1500</button>
+        <button class="seg" type="button" data-cap="2500">하이퍼리그 2500</button>
+      </div>
+
+      <div class="iv-inputs" id="iv-inputs">
+        <label class="iv-field">
+          <span class="iv-label">공격 <b id="iv-atk-val">0</b></span>
+          <input type="range" id="iv-atk" min="0" max="15" step="1" value="0" aria-label="공격 개체값">
+        </label>
+        <label class="iv-field">
+          <span class="iv-label">방어 <b id="iv-def-val">15</b></span>
+          <input type="range" id="iv-def" min="0" max="15" step="1" value="15" aria-label="방어 개체값">
+        </label>
+        <label class="iv-field">
+          <span class="iv-label">체력 <b id="iv-sta-val">15</b></span>
+          <input type="range" id="iv-sta" min="0" max="15" step="1" value="15" aria-label="체력 개체값">
+        </label>
+      </div>
+
+      <div class="iv-result" id="iv-result" aria-live="polite">
+        <p class="iv-empty">포켓몬을 먼저 선택하면 순위가 바로 나옵니다.</p>
+      </div>
+
+      <details class="detail-wrap" id="iv-top-wrap" hidden>
+        <summary>이 포켓몬 상위 10개 조합 보기</summary>
+        <div id="iv-top"></div>
+      </details>
+
+      <p class="fineprint">
+        스탯 프로덕트 = 실제 공격 × 실제 방어 × 실제 체력(소수점 버림)으로, CP 상한 안에서 오를 수 있는 가장 높은 레벨의 값입니다.
+        PvPoke·포켓몬고 IV 계산기들이 쓰는 것과 같은 기준이라, 같은 포켓몬이라도 리그(1500·2500)에 따라 1위 개체값이 달라집니다.
+        CPM은 게임마스터 표준값(1~50레벨)을 그대로 썼고, CP 공식은 <code>floor((공격)×√(방어)×√(체력)×CPM²/10)</code>입니다.
+        종족값은 pogoapi.net 기준이라 게임 업데이트로 조정되면 결과도 달라질 수 있어요.
+      </p>
+    </article>
+  </section>
+
+  <!-- ══════════════════ 탭 : 배틀리그 티어 ══════════════════ -->
+  <section class="tab-panel" id="tab-tier" role="tabpanel" aria-labelledby="tabbtn-tier" hidden>
+
+    <article class="panel tier-panel">
+      <h3 class="panel-title">🏆 배틀리그 인기 TOP 30</h3>
+      <p class="panel-desc">
+        PvPoke 공개 랭킹(overall) 기준 상위 30마리입니다. 추천 기술은 그 포켓몬의 표준 기술배치이고,
+        역할은 PvPoke의 카테고리 랭킹(리드·세이프 스왑·클로저·차저·어태커)에서 가장 높은 순위를 그대로 옮겼습니다.
+      </p>
+
+      <div class="seg-group iv-league" id="tier-league" role="group" aria-label="리그 선택">
+        <button class="seg is-active" type="button" data-lg="1500">슈퍼리그 1500</button>
+        <button class="seg" type="button" data-lg="2500">하이퍼리그 2500</button>
+      </div>
+
+      <div class="tier-list" id="tier-list"></div>
+
+      <p class="fineprint">
+        순위·추천 기술·주의 카운터는 PvPoke 공개 랭킹(2026-11)을 그대로 정리했고, 기술·타입 한국어 표기는 PokeAPI 기준입니다.
+        기술명은 게임 내 번역과 조금 다를 수 있으며, 시즌 밸런스 패치로 순위가 바뀌면 실제 메타와 차이가 생길 수 있어요.
+        순위는 PvPoke가 각 리그 CP 상한에 맞춘 표준 개체값으로 시뮬레이션한 결과라, 내 개체값이 다르면 체감 순위는 조금 달라질 수 있어요.
       </p>
     </article>
   </section>
@@ -426,7 +514,10 @@
 <script src="data/events.js?v=20261126cd4"></script>
 <script src="data/raids.js"></script>
 <script src="data/pokedex.js"></script>
+<script src="data/cpm.js"></script>
+<script src="data/raid-counters.js"></script>
+<script src="data/pvp-tier.js"></script>
 <script src="data/guides.js"></script>
-<script src="app.js?v=20261126cd4"></script>
+<script src="app.js?v=20261126ef1"></script>
 </body>
 </html>

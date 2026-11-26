@@ -13,6 +13,9 @@
   var DEX = window.HUB_POKEDEX || [];
   var DEX_MOVES = window.HUB_DEX_MOVES || [];
   var GUIDES = window.HUB_GUIDES || [];
+  var RAID_TOP = window.HUB_RAID_TOP || {};
+  var PVP_TIER = window.HUB_PVP_TIER || {};
+  var CPM_TABLE = window.HUB_CPM || {};
 
   var $ = function (sel, root) { return (root || document).querySelector(sel); };
   var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
@@ -128,7 +131,7 @@
   }
 
   /* ─────────────── 탭 ─────────────── */
-  var TABS = ['events', 'raids', 'pokedex', 'powerup', 'guide'];
+  var TABS = ['events', 'raids', 'pokedex', 'tier', 'powerup', 'guide'];
 
   function switchTab(name, opts) {
     if (TABS.indexOf(name) < 0) name = 'events';
@@ -487,6 +490,54 @@
     return picks.slice(0, limit).sort(byScore);
   }
 
+  /* ─────────────── 레이드 카운터 TOP 6 (data/raid-counters.js) ─────────────── */
+  var TAG_CLASS = { '메가': 'is-mega', '그림자': 'is-shadow', '일반': 'is-normal' };
+
+  function effText(v) {
+    var s = Number(v || 0);
+    return '×' + (Math.abs(s - Math.round(s)) < 0.001 ? String(Math.round(s)) : s.toFixed(2).replace(/0+$/, '').replace(/\.$/, ''));
+  }
+
+  function renderBossCounters(boss) {
+    var el = $('#boss-counters');
+    if (!el) return;
+    var rows = RAID_TOP[boss.id];
+    if (rows && rows.length) {
+      el.innerHTML = rows.map(function (c, i) {
+        var effClass = c.eff > 1.001 ? '' : ' is-normal';
+        var elite = (c.fe || c.ce) ? ' <span class="ctag is-elite">ⓔ 엘리트</span>' : '';
+        return '<div class="counter-card">' +
+          '<span class="counter-rank">' + (i + 1) + '</span>' +
+          '<div class="counter-info">' +
+            '<p class="counter-name">' + c.n +
+              ' <span class="ctag ' + (TAG_CLASS[c.tag] || '') + '">' + c.tag + '</span>' + elite + '</p>' +
+            '<p class="counter-moves" title="' + c.f + ' / ' + c.c + ' (' + c.fEn + ' · ' + c.cEn + ')">' +
+              '<span class="mv-tag">졸업</span> <em>' + c.f + '</em> / <em>' + c.c + '</em>' +
+              ' <span class="counter-mvs-en">(' + c.fEn + ' · ' + c.cEn + ')</span></p>' +
+          '</div>' +
+          '<span class="counter-eff' + effClass + '">' + effText(c.eff) +
+            '<span class="counter-dps">' + c.dps + ' DPS</span></span>' +
+        '</div>';
+      }).join('');
+      return;
+    }
+    /* 데이터가 없는 새 보스는 기존 타입 기반 추천으로 대체 */
+    var picks = computeCounters(boss, 6);
+    el.innerHTML = picks.map(function (p, i) {
+      var c = p.c;
+      var effClass = p.eff > 1.001 ? '' : ' is-normal';
+      return '<div class="counter-card">' +
+        '<span class="counter-rank">' + (i + 1) + '</span>' +
+        '<div class="counter-info">' +
+          '<p class="counter-name">' + c.kr + ' <span style="font-weight:600;color:var(--muted);font-size:11px">' + c.tier + '</span></p>' +
+          '<p class="counter-moves"><em>' + c.fast.kr + '</em> / <em>' + c.charged.kr + '</em>' +
+            ' <span style="opacity:.65">(' + c.fast.en + ' · ' + c.charged.en + ')</span></p>' +
+        '</div>' +
+        '<span class="counter-eff' + effClass + '">×' + p.eff.toFixed(2) + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
   function typeChipHTML(id) {
     return '<span class="type-chip" style="background:' + PGO.typeColor(id) + ';color:' + PGO.typeText(id) + '">' +
       PGO.typeKo(id) + '</span>';
@@ -499,7 +550,9 @@
       return '<button class="boss-chip' + (b.status === 'ref' ? ' is-ref' : '') + '" type="button" data-boss="' + b.id + '">' +
         '<img src="' + SPRITE(b.dex) + '" alt="" loading="lazy" onerror="__spriteFallback(this)||(this.style.display=\'none\',this.nextElementSibling.style.display=\'grid\')">' +
         '<span class="bc-fallback" style="display:none">' + (b.types[0] === 'psychic' ? '🔮' : b.types[0] === 'ice' ? '❄️' : '⚔️') + '</span>' +
-        '<span class="bc-text"><span class="bc-name">' + b.kr + '</span><span class="bc-tier">' + b.tier + '</span></span>' +
+        '<span class="bc-text"><span class="bc-name">' + b.kr + '</span><span class="bc-tier">' + b.tier + '</span>' +
+          (RAID_TOP[b.id] && RAID_TOP[b.id][0] ? '<span class="bc-top1">1위 ' + RAID_TOP[b.id][0].n + '</span>' : '') +
+        '</span>' +
       '</button>';
     }).join('');
   }
@@ -541,20 +594,7 @@
         }).join('')
       : '<span class="fineprint">약점 타입을 부스트하는 날씨가 없습니다.</span>';
 
-    var picks = computeCounters(boss, 6);
-    $('#boss-counters').innerHTML = picks.map(function (p, i) {
-      var c = p.c;
-      var effClass = p.eff > 1.001 ? '' : ' is-normal';
-      return '<div class="counter-card">' +
-        '<span class="counter-rank">' + (i + 1) + '</span>' +
-        '<div class="counter-info">' +
-          '<p class="counter-name">' + c.kr + ' <span style="font-weight:600;color:var(--muted);font-size:11px">' + c.tier + '</span></p>' +
-          '<p class="counter-moves"><em>' + c.fast.kr + '</em> / <em>' + c.charged.kr + '</em>' +
-            ' <span style="opacity:.65">(' + c.fast.en + ' · ' + c.charged.en + ')</span></p>' +
-        '</div>' +
-        '<span class="counter-eff' + effClass + '">×' + p.eff.toFixed(2) + '</span>' +
-      '</div>';
-    }).join('');
+    renderBossCounters(boss);
 
     var tipEl = $('#max-tip');
     if (boss.max) {
@@ -776,6 +816,258 @@
     }).join('');
     $('#powerup-breakdown').innerHTML =
       '<table><thead><tr><th>구간</th><th>모래</th><th>사탕</th><th>XL</th></tr></thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  /* ─────────────── 배틀리그 IV 순위 계산기 ───────────────
+     CP 상한(1500·2500) 안에서 도달하는 최고 레벨의 스탯 프로덕트로 4,096조합 순위를 매긴다. */
+  var CPM_LEVELS = Object.keys(CPM_TABLE).map(Number).sort(function (a, b) { return a - b; });
+  var IV_CACHE = {};
+
+  function cpAt(p, a, d, s, cpm) {
+    return Math.max(10, Math.floor((p.a + a) * Math.sqrt(p.d + d) * Math.sqrt(p.s + s) * cpm * cpm / 10));
+  }
+
+  function bestLevel(p, a, d, s, cap) {
+    if (!CPM_LEVELS.length) return 1;
+    var last = CPM_LEVELS[CPM_LEVELS.length - 1];
+    if (cpAt(p, a, d, s, CPM_TABLE[last]) <= cap) return last;
+    var lo = 0, hi = CPM_LEVELS.length - 1, best = CPM_LEVELS[0];
+    while (lo <= hi) {
+      var mid = (lo + hi) >> 1, lv = CPM_LEVELS[mid];
+      if (cpAt(p, a, d, s, CPM_TABLE[lv]) <= cap) { best = lv; lo = mid + 1; }
+      else { hi = mid - 1; }
+    }
+    return best;
+  }
+
+  function ivTable(p, cap) {
+    var key = p.id + ':' + cap;
+    if (IV_CACHE[key]) return IV_CACHE[key];
+    var rows = [];
+    for (var a = 0; a <= 15; a++) {
+      for (var d = 0; d <= 15; d++) {
+        for (var s = 0; s <= 15; s++) {
+          var lv = bestLevel(p, a, d, s, cap), cpm = CPM_TABLE[lv];
+          rows.push({ a: a, d: d, s: s, lv: lv, cp: cpAt(p, a, d, s, cpm),
+                      prod: (p.a + a) * cpm * (p.d + d) * cpm * Math.floor((p.s + s) * cpm) });
+        }
+      }
+    }
+    rows.sort(function (x, y) { return y.prod - x.prod || y.cp - x.cp; });
+    for (var i = 0; i < rows.length; i++) rows[i].rank = i + 1;
+    IV_CACHE[key] = rows;
+    return rows;
+  }
+
+  var ivState = { mon: null, cap: 1500, a: 0, d: 15, s: 15, active: -1, list: [] };
+
+  function ivLvText(lv) {
+    return 'Lv.' + (Number.isInteger(lv) ? lv : lv.toFixed(1));
+  }
+
+  function ivSuggest(raw) {
+    var sug = $('#iv-suggest');
+    var q = String(raw || '').trim();
+    if (!q) { sug.hidden = true; sug.innerHTML = ''; ivState.list = []; return; }
+    dexPrep();
+    ivState.list = DEX.filter(function (p) { return dexMatch(p, q); }).slice(0, 8);
+    ivState.active = 0;
+    if (!ivState.list.length) {
+      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호로 다시 입력해 보세요.</li>';
+      sug.hidden = false;
+      return;
+    }
+    sug.innerHTML = ivState.list.map(function (p, i) {
+      return '<li><button class="iv-sug' + (i === ivState.active ? ' is-active' : '') + '" type="button" data-iv-dex="' + p.id + '">' +
+        '<span class="iv-sug-no">' + dexNo(p.id) + '</span>' +
+        '<span class="iv-sug-name">' + p.n + '</span>' +
+        '<span class="iv-sug-types">' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + '</span>' +
+      '</button></li>';
+    }).join('');
+    sug.hidden = false;
+  }
+
+  function ivPick(id, opts) {
+    var p = DEX.filter(function (x) { return x.id === id; })[0];
+    if (!p) return;
+    ivState.mon = p;
+    ivState.active = -1;
+    $('#iv-q').value = p.n;
+    $('#iv-suggest').hidden = true;
+    var picked = $('#iv-picked');
+    picked.hidden = false;
+    picked.innerHTML = '<img src="' + dexArt(p.id, false) + '" alt="" width="30" height="30" onerror="this.style.display=\'none\'">' +
+      '<b>' + p.n + '</b> <span>' + p.t.map(function (t) { return PGO.typeKo(t); }).join('·') + ' · 최대 CP ' + num(maxCP(p, CPM50)) + '</span>';
+    if (!opts || !opts.silent) track('iv_pick', { pokemon: p.n, dex_id: p.id });
+    renderIV();
+  }
+
+  function renderIV() {
+    var box = $('#iv-result');
+    if (!box) return;
+    var p = ivState.mon;
+    var topWrap = $('#iv-top-wrap');
+    if (!p) {
+      box.innerHTML = '<p class="iv-empty">포켓몬을 먼저 선택하면 순위가 바로 나옵니다.</p>';
+      if (topWrap) topWrap.hidden = true;
+      return;
+    }
+    var rows = ivTable(p, ivState.cap);
+    var total = rows.length;
+    var me = null, best = rows[0];
+    for (var i = 0; i < total; i++) {
+      if (rows[i].a === ivState.a && rows[i].d === ivState.d && rows[i].s === ivState.s) { me = rows[i]; break; }
+    }
+    if (!me) return;
+    var pct = me.rank / total * 100;
+    var pctText = pct < 1 ? pct.toFixed(2) : pct < 10 ? pct.toFixed(1) : Math.round(pct).toString();
+    var ratio = me.prod / best.prod * 100;
+    var cpm = CPM_TABLE[me.lv];
+    var maxLv = CPM_LEVELS[CPM_LEVELS.length - 1];
+    var maxCp = cpAt(p, 15, 15, 15, CPM_TABLE[maxLv]);
+    var shortNote = maxCp < ivState.cap
+      ? '<p class="iv-short">50레벨 최대 CP가 ' + num(maxCp) + '이라 ' + num(ivState.cap) + ' 상한에 닿지 않아요. 이 경우 15/15/15가 가장 강합니다.</p>'
+      : '';
+    var atk = (p.a + me.a) * cpm, def = (p.d + me.d) * cpm, sta = Math.floor((p.s + me.s) * cpm);
+    var grade = me.rank <= 10 ? 'S' : me.rank <= 100 ? 'A' : me.rank <= 500 ? 'B' : me.rank <= 1500 ? 'C' : 'D';
+
+    box.innerHTML =
+      '<div class="iv-head">' +
+        '<div class="iv-badge is-' + grade.toLowerCase() + '"><span>#' + num(me.rank) + '</span><small>/ ' + num(total) + '</small></div>' +
+        '<div class="iv-head-text">' +
+          '<p class="iv-rankline">' + (ivState.cap === 1500 ? '슈퍼리그 1500' : '하이퍼리그 2500') +
+            ' · <b>상위 ' + pctText + '%</b> <span class="iv-grade">' + grade + '급</span></p>' +
+          '<p class="iv-ivline">' + me.a + ' / ' + me.d + ' / ' + me.s +
+            ' <span>(공격·방어·체력)</span> · 1위 대비 스탯 ' + ratio.toFixed(1) + '%</p>' +
+        '</div>' +
+      '</div>' +
+      '<div class="iv-metrics">' +
+        '<div class="iv-metric"><span>도달 레벨</span><b>' + ivLvText(me.lv) + '</b></div>' +
+        '<div class="iv-metric"><span>실제 CP</span><b>' + num(me.cp) + '</b></div>' +
+        '<div class="iv-metric"><span>스탯 프로덕트</span><b>' + num(Math.round(me.prod)) + '</b></div>' +
+      '</div>' +
+      '<div class="iv-stats">' +
+        statRow('공격', Math.round(atk * 10) / 10, '#F97362') +
+        statRow('방어', Math.round(def * 10) / 10, '#38BDF8') +
+        statRow('체력', sta, '#34D399') +
+      '</div>' +
+      '<div class="iv-best">' +
+        '<span class="iv-best-label">이 리그 1위</span>' +
+        '<b>' + best.a + '/' + best.d + '/' + best.s + '</b>' +
+        '<span>' + ivLvText(best.lv) + ' · CP ' + num(best.cp) + ' · 스탯 ' + num(Math.round(best.prod)) + '</span>' +
+        (me.rank === 1 ? '<span class="iv-crown">이미 1위 개체값이에요 🎉</span>' : '') +
+      '</div>' + shortNote;
+
+    if (topWrap) {
+      topWrap.hidden = false;
+      var top10 = rows.slice(0, 10);
+      var trs = top10.map(function (r) {
+        var isMe = r.a === me.a && r.d === me.d && r.s === me.s;
+        return '<tr' + (isMe ? ' class="is-me"' : '') + '><td>' + r.rank + '</td><td>' + r.a + '/' + r.d + '/' + r.s + '</td>' +
+          '<td>' + ivLvText(r.lv) + '</td><td>' + num(r.cp) + '</td><td>' + num(Math.round(r.prod)) + '</td></tr>';
+      }).join('');
+      $('#iv-top').innerHTML = '<table><thead><tr><th>순위</th><th>개체값</th><th>레벨</th><th>CP</th><th>스탯</th></tr></thead><tbody>' + trs + '</tbody></table>';
+    }
+  }
+
+  function initIV() {
+    var q = $('#iv-q');
+    if (!q) return;
+    var sug = $('#iv-suggest');
+
+    q.addEventListener('input', function () {
+      if (!q.value.trim()) ivState.mon = null;
+      ivSuggest(q.value);
+      renderIV();
+    });
+    q.addEventListener('keydown', function (e) {
+      if (sug.hidden || !ivState.list.length) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        var n = ivState.list.length;
+        ivState.active = (ivState.active + (e.key === 'ArrowDown' ? 1 : -1) + n) % n;
+        $$('.iv-sug', sug).forEach(function (b, i) { b.classList.toggle('is-active', i === ivState.active); });
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        var pick = ivState.list[ivState.active >= 0 ? ivState.active : 0];
+        if (pick) ivPick(pick.id);
+      } else if (e.key === 'Escape') {
+        sug.hidden = true;
+      }
+    });
+    sug.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-iv-dex]');
+      if (b) ivPick(Number(b.getAttribute('data-iv-dex')));
+    });
+
+    var league = $('#iv-league');
+    if (league) league.addEventListener('click', function (e) {
+      var b = e.target.closest('.seg');
+      if (!b) return;
+      $$('.seg', league).forEach(function (x) { x.classList.remove('is-active'); });
+      b.classList.add('is-active');
+      ivState.cap = Number(b.getAttribute('data-cap'));
+      track('iv_league', { cap: ivState.cap });
+      renderIV();
+    });
+
+    [['iv-atk', 'a', 'iv-atk-val'], ['iv-def', 'd', 'iv-def-val'], ['iv-sta', 's', 'iv-sta-val']].forEach(function (cfg) {
+      var el = $('#' + cfg[0]);
+      if (!el) return;
+      el.addEventListener('input', function () {
+        ivState[cfg[1]] = Number(el.value);
+        $('#' + cfg[2]).textContent = el.value;
+        renderIV();
+      });
+    });
+  }
+
+  /* ─────────────── 배틀리그 티어 (data/pvp-tier.js) ─────────────── */
+  var tierState = { lg: '1500' };
+
+  function tierRowHTML(r) {
+    var types = r.t.map(function (t) {
+      return '<span class="type-chip" style="background:' + PGO.typeColor(t) + ';color:' + PGO.typeText(t) + '">' + PGO.typeKo(t) + '</span>';
+    }).join('');
+    var mv = r.mv || [];
+    var charged = mv.slice(1).join(' / ');
+    var warn = [];
+    if (r.weak && r.weak.length) warn.push('약점 ' + r.weak.join('·'));
+    if (r.cnt && r.cnt.length) warn.push('주의 카운터 ' + r.cnt.join(', '));
+    return '<article class="tier-row">' +
+      '<span class="tier-rank' + (r.r <= 3 ? ' is-top' : '') + '">' + r.r + '</span>' +
+      '<div class="tier-body">' +
+        '<p class="tier-name">' + r.n + ' <span class="role-chip">' + r.role + '</span></p>' +
+        '<div class="tier-types">' + types + '</div>' +
+        '<p class="tier-moves"><span class="tm-label">노말</span> ' + (mv[0] || '-') +
+          '<span class="tm-sep">·</span><span class="tm-label">스페셜</span> ' + (charged || '-') + '</p>' +
+        (warn.length ? '<p class="tier-warn">' + warn.join(' · ') + '</p>' : '') +
+      '</div>' +
+    '</article>';
+  }
+
+  function renderTier() {
+    var list = $('#tier-list');
+    if (!list) return;
+    var rows = PVP_TIER[tierState.lg] || [];
+    list.innerHTML = rows.length
+      ? rows.map(tierRowHTML).join('')
+      : '<p class="iv-empty">랭킹 데이터를 불러오지 못했어요.</p>';
+  }
+
+  function initTier() {
+    var wrap = $('#tier-league');
+    if (!wrap) return;
+    wrap.addEventListener('click', function (e) {
+      var b = e.target.closest('.seg');
+      if (!b) return;
+      $$('.seg', wrap).forEach(function (x) { x.classList.remove('is-active'); });
+      b.classList.add('is-active');
+      tierState.lg = b.getAttribute('data-lg');
+      track('tier_league', { league: tierState.lg });
+      renderTier();
+    });
+    renderTier();
   }
 
   /* ─────────────── 도감 탭 ─────────────── */
@@ -1623,6 +1915,8 @@
     initBossGrid();
     initTypeCalc();
     initPowerUp();
+    initIV();
+    initTier();
     initDex();
     initModals();
     initShare();
@@ -1686,6 +1980,22 @@
     },
     costAt: costAt,
     computeCounters: computeCounters,
+    raidTop: RAID_TOP,
+    pvpTier: PVP_TIER,
+    ivPick: ivPick,
+    ivTable: ivTable,
+    ivState: ivState,
+    ivRankOf: function (id, cap, a, d, s) {
+      var p = DEX.filter(function (x) { return x.id === id; })[0];
+      if (!p) return null;
+      var rows = ivTable(p, cap || 1500);
+      for (var i = 0; i < rows.length; i++) {
+        if (rows[i].a === a && rows[i].d === d && rows[i].s === s) {
+          return { rank: rows[i].rank, level: rows[i].lv, cp: rows[i].cp, prod: rows[i].prod, best: rows[0] };
+        }
+      }
+      return null;
+    },
     eventState: eventState,
     nextUpcoming: nextUpcoming,
     kstClock: kstClock,
