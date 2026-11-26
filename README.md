@@ -16,6 +16,8 @@ web/pokemongo-hub/
 │   ├── raids.js          # 레이드 보스 · 추천 카운터 · 기술 데이터
 │   ├── pokedex.js        # 한글 도감 데이터 1,024종 (자동 생성 파일)
 │   └── guides.js         # 가이드 12편 본문(섹션·표·체크리스트·내부 이동 버튼)
+├── assets/
+│   └── og-obaksa.jpg     # 링크 공유 대표 썸네일(og:image · 1024×1024 JPEG)
 ├── tools/build_pokedex.py # 도감 데이터 생성 스크립트 (pogoapi.net + PokeAPI → data/pokedex.js)
 ├── tests/verify.py       # headless chromium 자동 검증(로직 + 폰트·테마 + 도감 + 제휴 배너 + 스크린샷)
 ├── preview_mobile.png    # 390×844 미리보기
@@ -102,7 +104,7 @@ npx vercel web/pokemongo-hub --prod
 sh repos/deploy-pokemongo-hub.sh
 ```
 
-- 배포 대상: `index.html` · `styles.css` · `app.js` · `data/` · `robots.txt` · `ads.txt` · `.nojekyll` · `README.md`
+- 배포 대상: `index.html` · `styles.css` · `app.js` · `data/` · `assets/` · `robots.txt` · `ads.txt` · `.nojekyll` · `README.md`
   (`tests/`, `tools/`, 스크린샷 `*.png` 은 올리지 않습니다.)
 - 예전 주소 `https://pogo-obaksa.github.io/pokemongo-hub/` 는 같은 내용을 복사해 두지 않고,
   **루트 주소로 즉시 넘기는 리다이렉트 전용 페이지**(`index.html` · `404.html`, 쿼리·해시 유지)만 둡니다.

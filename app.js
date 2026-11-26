@@ -174,6 +174,32 @@
     });
   }
 
+  /* ─────────────── 홈(상단 브랜드) 클릭 ───────────────
+     어느 탭·글·상세창에 있든 첫 화면(일정 탭) 맨 위로 돌아간다. */
+  function goHome() {
+    var activeBtn = document.querySelector('.tab.is-active');
+    var fromTab = activeBtn ? activeBtn.getAttribute('data-tab') : '';
+    if (guideState.slug) fromTab = 'guide/' + guideState.slug;
+    var dex = $('#dex-backdrop'), modal = $('#modal-backdrop');
+    if (dex && !dex.hidden) closeDex();
+    if (modal && !modal.hidden) closeModal();
+    if (guideState.slug) showGuideIndex({ nav: 'none' });
+    switchTab('events');
+    track('home_click', { from_tab: fromTab || 'events' });
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    catch (e) { window.scrollTo(0, 0); }
+  }
+
+  function initBrand() {
+    var brand = $('#brand-home');
+    if (!brand) return;
+    brand.addEventListener('click', function (e) {
+      /* 자바스크립트가 살아 있으면 해시를 직접 정리하고, 아니면 href="#events" 기본 동작에 맡긴다 */
+      e.preventDefault();
+      goHome();
+    });
+  }
+
   /* ─────────────── 일정 탭 ─────────────── */
   var eventFilter = 'all';
   var renderedEventIds = {};
@@ -1497,6 +1523,7 @@
   function boot() {
     tickClock();
     initTabs();
+    initBrand();
     initFilterChips();
     initBossGrid();
     initTypeCalc();
@@ -1568,6 +1595,7 @@
     kstClock: kstClock,
     selectBoss: selectBoss,
     switchTab: switchTab,
+    goHome: goHome,
     events: EVENTS,
     bosses: BOSSES,
     dex: DEX,
