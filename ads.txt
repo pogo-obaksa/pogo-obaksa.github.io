@@ -1,2 +1,1 @@
-# 애드센스 승인 후 아래 형식으로 한 줄을 추가하세요.
-# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
+google.com, pub-2879207392914466, DIRECT, f08c47fec0942fa0
