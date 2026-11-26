@@ -20,6 +20,39 @@
   var num = function (n) { return Number(n || 0).toLocaleString('ko-KR'); };
   var DAY = 86400000;
 
+  /* ─────────────── 이미지 호스트 · 폴백 ───────────────
+     국내 PC 네트워크에서 raw.githubusercontent.com 이 막히는 경우가 있어
+     기본은 jsDelivr CDN(같은 PokeAPI/sprites 저장소)으로 받고,
+     1차 실패 시 raw.githubusercontent.com 으로 한 번만 돌아간 뒤,
+     그마저 실패하면 각 자리의 기존 폴백(이모지 · 👾 · 숨김)이 이어서 동작한다. */
+  var CDN_HOST = 'https://cdn.jsdelivr.net/gh/PokeAPI/sprites@master/';
+  var RAW_HOST = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/';
+
+  /* 인라인 onerror 에서 부르는 전역 폴백 — true 를 돌려주면 '아직 시도할 게 남아 있다'는 뜻 */
+  function spriteFallback(img) {
+    var cur = img.getAttribute('src') || '';
+    var step = parseInt(img.getAttribute('data-fallback-tried') || '0', 10) || 0;
+    var alt = img.getAttribute('data-alt-src') || '';
+    if (step === 0 && cur.indexOf(CDN_HOST) === 0) {
+      img.setAttribute('data-fallback-tried', '1');
+      img.src = RAW_HOST + cur.slice(CDN_HOST.length);
+      return true;
+    }
+    if (step <= 1 && alt && cur !== alt) {
+      img.setAttribute('data-fallback-tried', '2');
+      img.src = alt;
+      return true;
+    }
+    if (step === 2 && cur.indexOf(CDN_HOST) === 0) {
+      img.setAttribute('data-fallback-tried', '3');
+      img.src = RAW_HOST + cur.slice(CDN_HOST.length);
+      return true;
+    }
+    img.setAttribute('data-fallback-tried', '4');
+    return false;
+  }
+  window.__spriteFallback = spriteFallback;
+
   /* ─────────────── GA4 이벤트 ───────────────
      gtag.js가 없거나(오프라인·광고차단) 로드에 실패해도 절대 에러가 나지 않게 감싼다. */
   function track(name, params) {
@@ -152,7 +185,7 @@
     if (!ev.pokemonId) return '<div class="event-emoji" aria-hidden="true">' + fallback + '</div>';
     return '<div class="event-emoji has-mon" aria-hidden="true">' +
       '<img src="' + dexArt(ev.pokemonId) + '" alt="" loading="lazy" ' +
-        'onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">' +
+        'onerror="__spriteFallback(this)||(this.style.display=\'none\',this.nextElementSibling.style.display=\'block\')">' +
       fallback + '</div>';
   }
 
@@ -343,7 +376,7 @@
   /* ─────────────── 카운터 탭 ─────────────── */
   var activeBossId = null;
   var SPRITE = function (dex) {
-    return 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' + dex + '.png';
+    return CDN_HOST + 'sprites/pokemon/' + dex + '.png';
   };
 
   function tierWeight(tier) { return tier === 'S' ? 1 : tier === 'A' ? 0.93 : 0.86; }
@@ -427,7 +460,7 @@
     if (!wrap) return;
     wrap.innerHTML = BOSSES.map(function (b) {
       return '<button class="boss-chip' + (b.status === 'ref' ? ' is-ref' : '') + '" type="button" data-boss="' + b.id + '">' +
-        '<img src="' + SPRITE(b.dex) + '" alt="" loading="lazy" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\';">' +
+        '<img src="' + SPRITE(b.dex) + '" alt="" loading="lazy" onerror="__spriteFallback(this)||(this.style.display=\'none\',this.nextElementSibling.style.display=\'grid\')">' +
         '<span class="bc-fallback" style="display:none">' + (b.types[0] === 'psychic' ? '🔮' : b.types[0] === 'ice' ? '❄️' : '⚔️') + '</span>' +
         '<span class="bc-text"><span class="bc-name">' + b.kr + '</span><span class="bc-tier">' + b.tier + '</span></span>' +
       '</button>';
@@ -446,7 +479,7 @@
 
     $('#boss-name').textContent = boss.kr;
     $('#boss-meta').textContent = boss.en + ' · ' + boss.tier + ' · ' + boss.avail;
-    $('#boss-thumb').innerHTML = '<img src="' + SPRITE(boss.dex) + '" alt="' + boss.kr + '" onerror="this.parentNode.textContent=\'👾\';">';
+    $('#boss-thumb').innerHTML = '<img src="' + SPRITE(boss.dex) + '" alt="' + boss.kr + '" onerror="__spriteFallback(this)||(this.parentNode.textContent=\'👾\')">';
     $('#boss-types').innerHTML = boss.types.map(typeChipHTML).join('');
     $('#boss-note').textContent = boss.note || '';
 
@@ -709,7 +742,7 @@
   }
 
   /* ─────────────── 도감 탭 ─────────────── */
-  var ART_BASE = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/';
+  var ART_BASE = CDN_HOST + 'sprites/pokemon/other/official-artwork/';
 
   function dexArt(id, shiny) { return ART_BASE + (shiny ? 'shiny/' : '') + id + '.png'; }
   function dexNo(id) { return '#' + (id < 1000 ? ('00' + id).slice(-3) : String(id)); }
@@ -778,7 +811,8 @@
       '<span class="dex-no">' + dexNo(p.id) + '</span>' +
       (p.sh ? '<span class="dex-shiny" title="이로치 출시">✨</span>' : '') +
       '<span class="dex-thumb"><img src="' + dexArt(p.id, shiny) + '" alt="" loading="lazy" width="72" height="72" ' +
-        'onerror="this.onerror=null;this.src=\'' + dexArt(p.id, false) + '\';"></span>' +
+        (shiny ? 'data-alt-src="' + dexArt(p.id, false) + '" ' : '') +
+        'onerror="__spriteFallback(this)||(this.style.visibility=\'hidden\')"></span>' +
       '<span class="dex-name">' + p.n + '</span>' +
       '<span class="dex-types">' + p.t.map(dexTypeChip).join('') + '</span>' +
       '<span class="dex-cp">최대 CP ' + num(maxCP(p, CPM50)) + '</span>' +
@@ -888,8 +922,11 @@
 
     var img = $('#dex-art-img');
     if (img) img.addEventListener('error', function () {
+      if (spriteFallback(img)) return;
       if (dexSheet.shiny) {
         dexSheet.shiny = false;
+        img.removeAttribute('data-alt-src');
+        img.setAttribute('data-fallback-tried', '0');
         img.src = dexArt(p.id, false);
         var btn = $('#dex-shiny-toggle');
         if (btn) { btn.setAttribute('aria-pressed', 'false'); btn.textContent = '이로치 이미지 없음'; }
@@ -1024,6 +1061,8 @@
         if (!p || !btn || !image) return;
         btn.setAttribute('aria-pressed', dexSheet.shiny ? 'true' : 'false');
         btn.textContent = dexSheet.shiny ? '✨ 이로치 보는 중' : '✨ 이로치 보기';
+        image.removeAttribute('data-alt-src');
+        image.setAttribute('data-fallback-tried', '0');
         image.src = dexArt(p.id, dexSheet.shiny);
       }
     });
