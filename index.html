@@ -17,7 +17,7 @@
 <!-- Google AdSense — 사이트 소유권 확인 · 광고 게재 (게시자 ID pub-2879207392914466) -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2879207392914466" crossorigin="anonymous"></script>
 <title>오박사의 포켓몬 백과사전 | 포켓몬고 일정·한글 도감·레이드 카운터·배틀리그 IV·PvP 티어</title>
-<meta name="description" content="포켓몬고 한글 도감(이름·초성·도감번호 검색, 이로치·최대 CP·기술), 한국 시간 일정 카운트다운, 레이드 보스 약점과 추천 카운터 TOP 6(졸업 스킬), 레이드 인원별 클리어 계산, 배틀리그 IV 순위 계산기·PvP 티어 TOP 30·내 파티 3마리 약점 진단, 게임 검색창에 붙여넣는 한글 검색식 생성기, 내 이로치·이벤트 체크, 별의모래·사탕 육성 계산기, 타입 상성표, 초보·복귀용 공략 12편까지 한 화면에서.">
+<meta name="description" content="포켓몬고 한글 도감(이름·초성·도감번호 검색, 이로치·최대 CP·기술), 한국 시간 일정 카운트다운, 레이드 보스 약점과 추천 카운터 TOP 6(졸업 스킬), 레이드 인원별 클리어 계산, 배틀리그 IV 순위 계산기·PvP 티어 TOP 30·내 파티 3마리 약점 진단, 게임 검색창에 붙여넣는 한글 검색식 생성기, 실시간 트레이너 코드 친구추가, 별의모래·사탕·XL사탕 육성 계산기와 도달 레벨 역산기, 타입 상성표, 초보·복귀용 공략 12편까지 한 화면에서.">
 <meta name="keywords" content="포켓몬고 도감, 포켓몬고 한글 도감, 포켓몬고 도감번호 검색, 포켓몬고 일정, 레이드 카운터, 레이드 인원 계산, 배틀리그 IV, PvP 티어, 파티 약점 진단, 포켓몬고 검색어, 박스 정리 검색식, 이로치 체크, 슈퍼리그 1500, 하이퍼리그 2500, 타입 상성, 별의모래 계산기, 육성 계산기, 테오키스, 메가메타그로스">
 <meta name="robots" content="index, follow">
 <meta name="theme-color" content="#F4F7FA">
@@ -41,7 +41,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%23f5f7ff' stroke='%230b1020' stroke-width='8'/%3E%3Cpath d='M6 50h88' stroke='%230b1020' stroke-width='8'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%230b1020'/%3E%3Ccircle cx='50' cy='50' r='6' fill='%23f5f7ff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
-<link rel="stylesheet" href="styles.css?v=20261127e5">
+<link rel="stylesheet" href="styles.css?v=20261127r1">
 </head>
 <body>
 
@@ -109,6 +109,15 @@
 
   <!-- ══════════════════ 탭 1 : 일정 ══════════════════ -->
   <section class="tab-panel is-active" id="tab-events" role="tabpanel" aria-labelledby="tabbtn-events">
+
+    <a class="fr-banner" href="friends.html">
+      <span class="fr-banner-icon" aria-hidden="true">🤝</span>
+      <span class="fr-banner-text">
+        <strong>실시간 트레이너 코드 친구추가</strong>
+        <span>레이드 같이 할 사람, 매일 선물 교환할 친구가 필요하면 눌러 보렴</span>
+      </span>
+      <span class="fr-banner-go" aria-hidden="true">바로 가기 →</span>
+    </a>
 
     <div class="hero" id="hero-card" aria-live="polite">
       <div class="hero-main">
@@ -475,6 +484,66 @@
         종족값은 pogoapi.net 기준이라 게임 업데이트로 조정되면 결과도 달라질 수 있단다.
       </p>
     </article>
+    <article class="panel" id="rev-panel">
+      <h3 class="panel-title">🍬 내 사탕·별의모래로 몇 레벨까지?</h3>
+      <p class="panel-desc">지금 가진 별의모래·사탕·XL사탕을 전부 넣으면 어디까지 올라가는지, 40레벨·50레벨까지 얼마나 모자란지 한 번에 계산해 준단다.</p>
+
+      <div class="calc-form">
+        <label class="field">
+          <span>현재 레벨</span>
+          <select id="rev-from"></select>
+        </label>
+      </div>
+
+      <div class="seg-group" id="rev-kind" role="group" aria-label="포켓몬 상태">
+        <button class="seg is-active" data-rev-kind="normal" type="button">일반</button>
+        <button class="seg" data-rev-kind="shadow" type="button">그림자 +20%</button>
+        <button class="seg" data-rev-kind="purified" type="button">정화 −10%</button>
+        <button class="seg" data-rev-kind="shiny" type="button">반짝반짝</button>
+        <button class="seg" data-rev-kind="lucky" type="button">럭키 −50% 모래</button>
+      </div>
+
+      <div class="rev-inputs">
+        <label class="rev-field">
+          <span>✨ 보유 별의모래</span>
+          <input type="number" id="rev-dust" min="0" step="1000" inputmode="numeric" value="150000" aria-label="보유 별의모래">
+        </label>
+        <label class="rev-field">
+          <span>🍬 보유 사탕</span>
+          <input type="number" id="rev-candy" min="0" step="10" inputmode="numeric" value="200" aria-label="보유 사탕">
+        </label>
+        <label class="rev-field">
+          <span>🍬✨ 보유 XL사탕</span>
+          <input type="number" id="rev-xl" min="0" step="10" inputmode="numeric" value="0" aria-label="보유 XL사탕">
+        </label>
+      </div>
+      <p class="rev-hint">비우면 0으로 계산하고, 모르는 값은 대략으로 넣어도 된단다.</p>
+
+      <div class="iv-search rev-search">
+        <label class="iv-search-box" for="rev-q">
+          <span class="iv-search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="rev-q" class="iv-input" autocomplete="off" spellcheck="false"
+                 placeholder="포켓몬 이름 (선택 · 예상 최종 CP)" aria-label="예상 CP를 계산할 포켓몬 검색">
+        </label>
+        <ul class="iv-suggest" id="rev-suggest" hidden></ul>
+        <p class="iv-picked" id="rev-picked" hidden></p>
+      </div>
+
+      <div class="rev-iv" id="rev-iv" hidden>
+        <label class="rev-iv-field"><span>공격 IV</span><input type="number" id="rev-a" min="0" max="15" step="1" value="15" inputmode="numeric"></label>
+        <label class="rev-iv-field"><span>방어 IV</span><input type="number" id="rev-d" min="0" max="15" step="1" value="15" inputmode="numeric"></label>
+        <label class="rev-iv-field"><span>체력 IV</span><input type="number" id="rev-s" min="0" max="15" step="1" value="15" inputmode="numeric"></label>
+        <span class="rev-iv-note">개체값(IV)을 넣을수록 예상 CP가 정확해져. 모르면 15/15/15(최대)로 두면 돼.</span>
+      </div>
+
+      <div class="rev-result" id="rev-result" aria-live="polite"></div>
+
+      <p class="fineprint">
+        강화 1회에 0.5레벨이 오르고, 그때마다 별의모래와 사탕이 같이 빠져나간다. 40레벨을 넘기면 사탕 대신 <strong>XL사탕</strong>이 들어가서,
+        XL사탕이 0개면 모래가 아무리 많아도 40레벨에서 멈춘다. 사탕이 모자라면 모래가 남아도 멈춘다. 그림자·정화 배수는 모래와 사탕에만 붙고,
+        반짝반짝(이로치)은 색만 다르고 육성 비용은 일반과 같다.
+      </p>
+    </article>
   </section>
 
   <!-- ══════════════════ 탭 : 배틀리그 티어 ══════════════════ -->
@@ -612,6 +681,7 @@
   <nav class="footer-links" aria-label="정책 및 안내">
     <a href="/privacy.html">개인정보처리방침</a>
     <a href="/terms.html">이용약관</a>
+    <a href="/friends.html">친구추가</a>
     <button type="button" data-modal="contact">문의</button>
     <a href="/disclaimer.html">면책조항</a>
     <button type="button" data-modal="about">소개</button>
@@ -652,7 +722,7 @@
 </div>
 
 <script src="data/types.js"></script>
-<script src="data/events.js?v=20261127e5"></script>
+<script src="data/events.js?v=20261127r1"></script>
 <script src="data/raids.js"></script>
 <script src="data/pokedex.js"></script>
 <script src="data/cpm.js"></script>
@@ -660,6 +730,6 @@
 <script src="data/pvp-tier.js"></script>
 <script src="data/sprites.js"></script>
 <script src="data/guides.js"></script>
-<script src="app.js?v=20261127e5"></script>
+<script src="app.js?v=20261127r1"></script>
 </body>
 </html>
