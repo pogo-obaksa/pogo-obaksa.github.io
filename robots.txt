@@ -7,3 +7,6 @@ Sitemap: https://pogo-obaksa.github.io/sitemap.xml
 
 # 다모아툴 (같은 도메인의 하위 경로 · 프로젝트 페이지)
 Sitemap: https://pogo-obaksa.github.io/damoatool/sitemap.xml
+
+# 셈판 (같은 도메인의 하위 경로 · 프로젝트 페이지)
+Sitemap: https://pogo-obaksa.github.io/sempan/sitemap.xml
