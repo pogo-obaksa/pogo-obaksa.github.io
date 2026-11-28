@@ -280,7 +280,7 @@
     var fromTab = activeBtn ? activeBtn.getAttribute('data-tab') : '';
     if (guideState.slug) fromTab = 'guide/' + guideState.slug;
     var dex = $('#dex-backdrop'), modal = $('#modal-backdrop');
-    if (dex && !dex.hidden) closeDex();
+    if (dex && !dex.hidden) closeDex({ history: 'keep' });
     if (modal && !modal.hidden) closeModal();
     if (guideState.slug) showGuideIndex({ nav: 'none' });
     switchTab('events');
@@ -1470,6 +1470,13 @@
   function dexArt(id, shiny) { return ART_BASE + (shiny ? 'shiny/' : '') + id + '.png'; }
   function dexNo(id) { return '#' + (id < 1000 ? ('00' + id).slice(-3) : String(id)); }
 
+  /* 도감번호 → 도감 항목 (진화 카드·이동 버튼에서 쓴다) */
+  var DEX_BY_ID = null;
+  function dexById(id) {
+    if (!DEX_BY_ID) { DEX_BY_ID = {}; DEX.forEach(function (p) { DEX_BY_ID[p.id] = p; }); }
+    return DEX_BY_ID[id] || null;
+  }
+
   var CPM40 = 0.7903001, CPM50 = 0.84029999;
 
   /* 최대 CP (15/15/15) */
@@ -1628,6 +1635,85 @@
   /* 배율 표기: 0.625 · 0.391 · 1.6 · 2.56 처럼 실제 배율값 그대로 */
   function multText(m) { return String(Math.round(m * 1000) / 1000); }
 
+  /* ── 진화 과정 ──
+     data/evolutions.js 의 계열 정보(HUB_EVO_ROOT·PARENT·REQ)로 지금 보는 포켓몬의
+     진화 계열을 단계별 카드로 그린다. 카드를 누르면 그 포켓몬 상세로 넘어간다. */
+  function evoReqText(r) {
+    if (!r) return '';
+    var t = [];
+    if (r.c) t.push('사탕 ' + r.c);
+    if (r.it) t.push(r.it);
+    if (r.lu) t.push(r.lu);
+    if (r.g === 'F') t.push('암컷');
+    else if (r.g === 'M') t.push('수컷');
+    if (r.bd) t.push('파트너 ' + r.bd + 'km');
+    if (r.d) t.push('낮');
+    if (r.n) t.push('밤');
+    if (r.u) t.push('거꾸로');
+    if (r.t) t.push('교환하면 사탕 0');
+    return t.join(' · ');
+  }
+
+  /* 계열을 단계별 배열로: [[첫 단계], [2단계...], [3단계...]] / 진화가 없으면 null */
+  function evoLevels(id) {
+    var rootMap = window.HUB_EVO_ROOT || {};
+    var parentMap = window.HUB_EVO_PARENT || {};
+    var root = rootMap[id];
+    if (root === undefined || root === null) return null;
+    var kids = {}, levels = [], cur = [root], seen = {};
+    Object.keys(parentMap).forEach(function (k) {
+      var par = parentMap[k];
+      (kids[par] = kids[par] || []).push(Number(k));
+    });
+    while (cur.length && levels.length < 12) {
+      levels.push(cur);
+      var next = [];
+      cur.forEach(function (x) {
+        seen[x] = 1;
+        (kids[x] || []).forEach(function (c) { if (!seen[c] && next.indexOf(c) < 0) next.push(c); });
+      });
+      cur = next;
+    }
+    return levels.length > 1 ? levels : null;
+  }
+
+  function evoSectionHTML(id) {
+    var levels = evoLevels(id);
+    if (!levels) return '<h4 class="dex-h">진화 과정</h4><p class="dex-none">진화하지 않는 포켓몬이란다.</p>';
+    var reqMap = window.HUB_EVO_REQ || {};
+    var CARD = 92, GAP = 7, ARROW = 18;
+    /* 카드를 가로로 늘어놓았을 때 시트 폭을 넘으면 단계를 위→아래로 쌓는다 */
+    var bodyEl = document.getElementById('dex-sheet-body');
+    var avail = (bodyEl && bodyEl.clientWidth ? bodyEl.clientWidth : Math.min(window.innerWidth || 390, 640)) - 34;
+    var total = ARROW * (levels.length - 1);
+    levels.forEach(function (ids) {
+      var rows = ids.length > 2 ? 2 : 1;
+      var cols = Math.ceil(ids.length / rows);
+      total += cols * CARD + (cols - 1) * GAP;
+    });
+    var wrap = total > avail;
+    var stages = levels.map(function (ids, li) {
+      var rows = wrap ? 1 : (ids.length > 2 ? 2 : 1);
+      var cards = ids.map(function (pid) {
+        var p = dexById(pid);
+        if (!p) return '';
+        var cur = pid === id;
+        var req = evoReqText(reqMap[pid]) || '기본 단계';
+        return '<button class="evo-card' + (cur ? ' is-current' : '') + '" type="button" data-evo-id="' + pid + '"' +
+            (cur ? ' aria-current="true"' : '') + ' aria-label="' + p.n + ' 상세로 보기">' +
+            '<span class="evo-thumb"><img src="' + dexArt(pid) + '" alt="" loading="lazy" ' +
+              'onerror="__spriteFallback(this)||(this.parentNode.style.visibility=\'hidden\')"></span>' +
+            '<span class="evo-name">' + p.n + '</span>' +
+            '<span class="evo-req">' + req + '</span>' +
+          '</button>';
+      }).join('');
+      return (li ? '<span class="evo-arrow" aria-hidden="true">→</span>' : '') +
+        '<div class="evo-stage" style="--evo-rows:' + rows + '">' + cards + '</div>';
+    }).join('');
+    return '<h4 class="dex-h">진화 과정 <span class="dex-h-sub">카드를 누르면 그 포켓몬으로</span></h4>' +
+      '<div class="dex-evo' + (wrap ? ' is-wrap' : '') + '">' + stages + '</div>';
+  }
+
   function renderDexSheet() {
     var p = dexSheet.list[dexSheet.idx];
     if (!p) return;
@@ -1673,13 +1759,14 @@
           (shinyOwned(p.id) ? 'true' : 'false') + '">' +
           (shinyOwned(p.id) ? '🏅 내 이로치로 체크됨' : '🏅 내 이로치로 체크') +
         '</button>' +
-        '<span class="dex-mine-hint">도감 탭 «🏅 내 이로치»에서 모아볼 수 있어요 · 이 브라우저에만 저장</span>' +
+        '<span class="dex-mine-hint">도감 탭 «🏅 내 이로치»에서 모아볼 수 있단다 · 이 브라우저에만 저장</span>' +
       '</div>' +
       '<div class="dex-mini">' +
         '<div class="dex-mini-item"><span>파트너 사탕 거리</span><strong>' + (p.bd ? p.bd + ' km' : '-') + '</strong></div>' +
         '<div class="dex-mini-item"><span>진화 사탕</span><strong>' + (p.ev ? p.ev + '개' : '진화 없음') + '</strong></div>' +
         '<div class="dex-mini-item"><span>이로치</span><strong>' + (p.sh ? '출시 ✨' : '정보 없음') + '</strong></div>' +
       '</div>' +
+      evoSectionHTML(p.id) +
       '<h4 class="dex-h">노말 기술</h4>' +
       '<div class="dex-moves">' + (moveChips(p.f, 'is-fast') || '<p class="dex-none">정보 없음</p>') +
         eliteChips(p.ef, 'is-fast') + '</div>' +
@@ -1705,7 +1792,8 @@
     });
   }
 
-  function openDex(id) {
+  function openDex(id, opts) {
+    opts = opts || {};
     dexPrep();
     var list = dexState.list.length ? dexState.list : DEX;
     var idx = -1;
@@ -1715,6 +1803,7 @@
       for (var j = 0; j < list.length; j++) { if (list[j].id === id) { idx = j; break; } }
     }
     if (idx < 0) return;
+    var wasOpen = !$('#dex-backdrop').hidden;
     dexSheet.list = list;
     dexSheet.idx = idx;
     dexSheet.shiny = false;
@@ -1723,12 +1812,46 @@
     $('#dex-backdrop').hidden = false;
     document.body.style.overflow = 'hidden';
     var body = $('#dex-sheet-body');
-    $('#dex-close').focus();
+    if (body) body.scrollTop = 0;
+    if (!wasOpen) {
+      if (opts.restore) dexHist.pushed = true;   /* 앞으로가기로 되돌아온 경우 */
+      else dexPushHistory(id);
+      $('#dex-close').focus();
+    } else {
+      dexSyncState(id);                          /* 앞/뒤·진화 카드 이동 */
+    }
   }
 
-  function closeDex() {
+  /* 도감 시트 히스토리
+     열 때 pushState({dexModal:id}) — 브라우저 뒤로가기가 페이지를 벗어나지 않고
+     시트만 닫힌다. 앞/뒤 포켓몬 이동과 진화 카드 이동은 replaceState 로 기록을 갈아끼운다. */
+  var dexHist = { pushed: false };
+
+  function dexPushHistory(id) {
+    dexHist.pushed = false;
+    if (!history.pushState) return;
+    try {
+      history.pushState({ dexModal: id }, '', location.href);
+      dexHist.pushed = true;
+    } catch (e) { /* 파일 주소·보안 설정으로 막히면 기록 없이 동작 */ }
+  }
+
+  function dexSyncState(id) {
+    if (!dexHist.pushed || !history.replaceState) return;
+    try { history.replaceState({ dexModal: id }, '', location.href); } catch (e) {}
+  }
+
+  function closeDex(opts) {
+    opts = opts || {};
+    var wasOpen = !$('#dex-backdrop').hidden;
     $('#dex-backdrop').hidden = true;
     document.body.style.overflow = '';
+    if (!wasOpen) return;
+    if (opts.history === 'keep') { dexHist.pushed = false; return; }
+    if (dexHist.pushed && history.back) {
+      dexHist.pushed = false;
+      history.back();          /* 방금 넣은 기록을 되돌려 다음 뒤로가기가 엉키지 않게 */
+    }
   }
 
   function stepDex(dir) {
@@ -1738,6 +1861,7 @@
     dexSheet.shiny = false;
     renderDexSheet();
     $('#dex-sheet-body').scrollTop = 0;
+    dexSyncState(dexSheet.list[dexSheet.idx].id);
   }
 
   function initDex() {
@@ -1827,12 +1951,24 @@
     });
 
     $('#dex-close').addEventListener('click', closeDex);
+    var backBtn = $('#dex-back');
+    if (backBtn) backBtn.addEventListener('click', function () { closeDex(); });
     $('#dex-prev').addEventListener('click', function () { stepDex(-1); });
     $('#dex-next').addEventListener('click', function () { stepDex(1); });
     $('#dex-backdrop').addEventListener('click', function (e) {
       if (e.target === $('#dex-backdrop')) closeDex();
     });
     $('#dex-sheet-body').addEventListener('click', function (e) {
+      var evoBtn = e.target.closest('[data-evo-id]');
+      if (evoBtn) {
+        var evoId = Number(evoBtn.getAttribute('data-evo-id'));
+        var prevMon = dexSheet.list[dexSheet.idx];
+        if (prevMon && prevMon.id !== evoId) {
+          track('pokedex_evo_click', { from_no: prevMon.id, from_name: prevMon.n, to_no: evoId });
+          openDex(evoId);
+        }
+        return;
+      }
       var ownToggle = e.target.closest('#dex-own-toggle');
       if (ownToggle) {
         var pm = dexSheet.list[dexSheet.idx];
@@ -2136,6 +2272,22 @@
     if (hash === 'guide') { switchTab('guide', { silent: true }); return true; }
     if (TABS.indexOf(hash) >= 0) { switchTab(hash, { silent: true }); return true; }
     return false;
+  }
+
+  /* 뒤로가기·앞으로가기 — 도감 시트가 열려 있으면 페이지를 벗어나지 않고 시트만 닫는다.
+     시트를 열 때 넣은 기록(pushState)을 되돌아온 것이므로 탭 이동은 그대로 따라간다. */
+  function onPopState(e) {
+    var st = e && e.state;
+    var open = !$('#dex-backdrop').hidden;
+    if (open && !(st && st.dexModal)) {
+      dexHist.pushed = false;
+      $('#dex-backdrop').hidden = true;
+      document.body.style.overflow = '';
+      routeFromLocation();
+      return;
+    }
+    if (!open && st && st.dexModal) { openDex(st.dexModal, { restore: true }); return; }
+    routeFromLocation();
   }
 
   /* ─────────────── 모달 ─────────────── */
@@ -3017,7 +3169,7 @@
     renderPromoBanners();
     initGuides();
 
-    window.addEventListener('popstate', routeFromLocation);
+    window.addEventListener('popstate', onPopState);
     window.addEventListener('hashchange', routeFromLocation);
 
     /* ?guide=<slug> 로 들어와도 해시 주소로 바꿔서 공유·뒤로가기가 되게 한다 */
