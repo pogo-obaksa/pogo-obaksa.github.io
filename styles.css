@@ -1723,3 +1723,5 @@ body{word-break:keep-all;overflow-wrap:break-word;}
 .prose li{line-height:1.85;}
 .gtable th,.gtable td{line-height:1.72;}
 .hero-sub{line-height:1.62;}
+/* 날짜·시각 줄이 길어질 때 카운트다운이 다음 줄로 밀리지 않게 날짜 칸이 먼저 줄어들게 한다 */
+.event-time{min-width:0;}
