@@ -1027,7 +1027,7 @@
     if (!q) { sug.hidden = true; sug.innerHTML = ''; return; }
     var list = dexSearch(q, 8);
     if (!list.length) {
-      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없어요. 이름·초성·도감번호로 다시 입력해 보세요.</li>';
+      sug.innerHTML = '<li class="iv-sug-empty">검색 결과가 없구나. 이름·초성·도감번호로 다시 찾아보렴.</li>';
       sug.hidden = false;
       return;
     }
