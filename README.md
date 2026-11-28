@@ -11,7 +11,7 @@ web/pokemongo-hub/
 ├── privacy.html          # 개인정보처리방침(독립 URL)
 ├── terms.html            # 이용약관(독립 URL)
 ├── disclaimer.html       # 면책조항(독립 URL)
-├── sitemap.xml           # 검색·애드센스 봇용 사이트맵 (홈 1 + 공략 12 + 정책 3 = 16 URL, 자동 생성)
+├── sitemap.xml           # 검색·애드센스 봇용 사이트맵 (홈 1 + 친구추가 1 + 공략 12 + 정책 3 = 17 URL, 자동 생성)
 ├── guide/                # 공략 12편 개별 정적 페이지 (/guide/<slug>.html, 자동 생성)
 ├── styles.css            # 라이트 테마(스카이·민트·몬스터볼 레드) · 모바일 퍼스트 반응형
 ├── app.js                # 카운트다운·카운터·타입 상성·육성/IV 계산·PvP 티어·도감 검색·가이드 라우팅 + 한글 검색식 생성기·파티 3마리 진단·레이드 인원 계산·이로치/이벤트 체크(localStorage)
@@ -20,6 +20,7 @@ web/pokemongo-hub/
 │   ├── events.js         # 일정 데이터 (여기만 고치면 일정이 갱신됩니다)
 │   ├── raids.js          # 레이드 보스 · 추천 카운터 · 기술 데이터
 │   ├── pokedex.js        # 한글 도감 데이터 1,024종 (자동 생성 파일)
+│   ├── evolutions.js     # 진화 계열·사탕·아이템·루어 조건 (자동 생성 파일, 포켓몬고 기준)
 │   ├── cpm.js            # 레벨 1~50 CPM 테이블 (배틀리그 IV 순위 계산용)
 │   ├── raid-counters.js  # 보스별 추천 카운터 TOP 6 · 졸업 스킬 (pogoapi PvE 수치로 계산)
 │   ├── pvp-tier.js       # 배틀리그 슈퍼 1500 · 하이퍼 2500 TOP 30 (PvPoke 랭킹 기준)
@@ -29,6 +30,7 @@ web/pokemongo-hub/
 │   ├── og-obaksa.jpg     # 링크 공유 대표 썸네일(og:image · 1024×1024 JPEG)
 │   └── events/           # 시즌·메인 이벤트·GO패스 카드용 공식 배너 썸네일 160×160 JPEG (파일명 = 이벤트 id)
 ├── tools/build_pokedex.py # 도감 데이터 생성 스크립트 (pogoapi.net + PokeAPI → data/pokedex.js)
+├── tools/build_evolutions.py # 진화 계열·조건 생성 스크립트 (pogoapi.net → data/evolutions.js)
 ├── tools/build_guide_pages.py # 공략 12편 → guide/*.html + sitemap.xml 생성 스크립트
 ├── tests/verify.py       # headless chromium 자동 검증(로직 + 폰트·테마 + 도감 + 제휴 배너 + 스크린샷)
 ├── preview_mobile.png    # 390×844 미리보기
@@ -81,6 +83,18 @@ python3 tools/build_pokedex.py [원본폴더]      # 기본: build/pokedex_src
 
 - 원본: pogoapi.net(pokemon_stats·pokemon_types·current_pokemon_moves·shiny_pokemon·pokemon_buddy_distances·pokemon_candy_to_evolve) + PokeAPI(한국어 이름·기술명 CSV)
 - 최대 CP는 15/15/15 기준 `floor((A+15)×√(D+15)×√(S+15)×CPM²÷10)` 로 화면에서 계산합니다.
+
+## 진화 데이터 갱신
+
+`data/evolutions.js`도 손으로 고치지 말고 스크립트로 다시 만듭니다. 도감 상세 시트의 「진화 과정」이 이 파일을 씁니다.
+
+```bash
+python3 tools/build_evolutions.py [원본폴더]   # 기본: build/pokedex_src
+```
+
+- 원본: pogoapi.net `pokemon_evolutions.json` — **포켓몬고에서 실제로 되는 진화만** 넣습니다(본가에만 있는 노라키→신비록·스라크→사마자르 같은 진화는 뺍니다).
+- pogoapi 원본에 아직 없는 진화(예: 모으령→타부자고 = 모으령의코인 999개)는 스크립트 안 `MANUAL_GO` 에 적습니다.
+- 사과 20개처럼 원본에 개수가 없는 아이템 수량은 `ITEM_QTY` 에 적습니다.
 
 ## 이미지(스프라이트·일러스트) 호스트
 
