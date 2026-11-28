@@ -1725,3 +1725,8 @@ body{word-break:keep-all;overflow-wrap:break-word;}
 .hero-sub{line-height:1.62;}
 /* 날짜·시각 줄이 길어질 때 카운트다운이 다음 줄로 밀리지 않게 날짜 칸이 먼저 줄어들게 한다 */
 .event-time{min-width:0;}
+/* 날짜와 남은 시간이 한 줄에 들어가도록 모바일에서 카운트다운 글자를 살짝 줄인다 */
+@media(max-width:520px){
+  .event-timer{font-size:12.5px;}
+  .event-foot{gap:6px 8px;}
+}
