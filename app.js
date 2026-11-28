@@ -1133,8 +1133,8 @@
     var bits = [];
     if (already) {
       bits.push(from <= target + 0.0001
-        ? '이미 ' + levelLabel(from) + ' — ' + target + '레벨이야'
-        : '이미 ' + levelLabel(from) + ' — ' + target + '레벨을 넘겼어');
+        ? '이미 ' + levelLabel(from) + ' — ' + target + '레벨이란다'
+        : '이미 ' + levelLabel(from) + ' — ' + target + '레벨을 넘겼단다');
     } else if (allOk) {
       bits.push('필요 <strong>' + num(need.dust) + '</strong> 모래 · 사탕 <strong>' + num(need.candy) + '</strong>' +
         (need.xl ? ' · XL <strong>' + num(need.xl) + '</strong>' : '') + ' — 바로 도달 가능');
@@ -1170,8 +1170,8 @@
         '<strong class="rev-hero-level">' + levelLabel(from) + ' 그대로</strong>' +
         '<span class="rev-hero-sub">강화 한 번에 모래 ' + num(step.dust) +
           (step.candy ? ' · 사탕 ' + num(step.candy) : '') +
-          (step.xl ? ' · XL사탕 ' + num(step.xl) : '') + '이 들어. ' +
-          (lack.length ? lack.join(' · ') + '만 더 모으면 ' + levelLabel(from + 0.5) + '까지 갈 수 있어.' : '') + '</span>';
+          (step.xl ? ' · XL사탕 ' + num(step.xl) : '') + '이 든단다. ' +
+          (lack.length ? lack.join(' · ') + '만 더 모으면 ' + levelLabel(from + 0.5) + '까지 갈 수 있단다.' : '') + '</span>';
     } else {
       head = '<span class="rev-hero-label">지금 가진 자원으로 도달 가능</span>' +
         '<strong class="rev-hero-level">' + levelLabel(reach.level) + '</strong>' +
@@ -1307,7 +1307,7 @@
     var maxLv = CPM_LEVELS[CPM_LEVELS.length - 1];
     var maxCp = cpAt(p, 15, 15, 15, CPM_TABLE[maxLv]);
     var shortNote = maxCp < ivState.cap
-      ? '<p class="iv-short">50레벨 최대 CP가 ' + num(maxCp) + '이라 ' + num(ivState.cap) + ' 상한에 닿지 않지. 이럴 때는 15/15/15가 가장 강하단다.</p>'
+      ? '<p class="iv-short">50레벨 최대 CP가 ' + num(maxCp) + '이라 ' + num(ivState.cap) + ' 상한에 닿지 않구나. 이럴 때는 15/15/15가 가장 강하단다.</p>'
       : '';
     var atk = (p.a + me.a) * cpm, def = (p.d + me.d) * cpm, sta = Math.floor((p.s + me.s) * cpm);
     var grade = me.rank <= 10 ? 'S' : me.rank <= 100 ? 'A' : me.rank <= 500 ? 'B' : me.rank <= 1500 ? 'C' : 'D';
@@ -2088,6 +2088,35 @@
     '</nav>';
   }
 
+  /* 모바일 가독성 — 문단 안 문장 경계에 <br> 를 넣어 줄글 덩어리를 끊는다 (2026-11-28) */
+  function breakSentences(el) {
+    var walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
+    var nodes = [], n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    for (var i = 0; i < nodes.length; i++) {
+      var t = nodes[i], v = t.nodeValue;
+      if (!v || !/[.!?]/.test(v)) continue;
+      if (t.parentNode && t.parentNode.closest && t.parentNode.closest('.gtable')) continue;
+      var frag = document.createDocumentFragment(), last = 0, changed = false;
+      var re = /([.!?])\s+(?=\S)/g, m;
+      while ((m = re.exec(v))) {
+        frag.appendChild(document.createTextNode(v.slice(last, m.index + 1)));
+        frag.appendChild(document.createElement('br'));
+        last = m.index + m[0].length;
+        changed = true;
+      }
+      if (!changed) continue;
+      frag.appendChild(document.createTextNode(v.slice(last)));
+      t.parentNode.replaceChild(frag, t);
+    }
+  }
+
+  function flowBreaks(root) {
+    if (!root) return;
+    var blocks = root.querySelectorAll('.guide-body p, .guide-body li');
+    for (var b = 0; b < blocks.length; b++) breakSentences(blocks[b]);
+  }
+
   function guideArticleHTML(g) {
     var secs = g.sections.map(function (s, i) {
       var html = '<section class="guide-sec" id="guide-' + g.slug + '-' + s.id + '">' +
@@ -2114,8 +2143,8 @@
       '<div class="guide-slot" data-slot="guide-bottom"></div>' +
       guideToolsHTML(g) +
       '<p class="fineprint guide-fineprint">' +
-        '기준일 ' + g.updated + ' · 수치는 게임 내 표기와 진행 중인 이벤트에 따라 달라질 수 있어. ' +
-        '업데이트로 내용이 바뀌면 게임 화면이 우선이야.' +
+        '기준일 ' + g.updated + ' · 수치는 게임 내 표기와 진행 중인 이벤트에 따라 달라질 수 있단다. ' +
+        '업데이트로 내용이 바뀌면 게임 화면이 우선이란다.' +
       '</p>' +
       guidePagerHTML(g);
   }
@@ -2163,6 +2192,7 @@
     placeGuidePromos('index');
     artEl.hidden = false;
     artEl.innerHTML = guideArticleHTML(g);
+    flowBreaks(artEl);
     placeGuidePromos('article');
     document.title = g.title + ' | 오박사의 포켓몬 백과사전';
 
@@ -2295,57 +2325,57 @@
     privacy: {
       title: '개인정보처리방침',
       body:
-        '<p>본 사이트(「오박사의 포켓몬 백과사전」)는 이용자의 개인정보를 소중히 생각하며, 관련 법령을 준수합니다.</p>' +
+        '<p>본 사이트(「오박사의 포켓몬 백과사전」)는 이용자의 개인정보를 소중히 생각하며, 관련 법령을 준수한다.</p>' +
         '<h3>1. 수집하는 정보</h3>' +
         '<ul>' +
-        '<li>회원가입·로그인이 없는 사이트로, 이름·전화번호·주소 같은 개인정보를 직접 수집하지 않습니다.</li>' +
-        '<li>다만 접속 과정에서 IP 주소, 브라우저 종류, 방문 일시, 방문 페이지 등이 자동으로 기록될 수 있습니다.</li>' +
-        '<li>광고·통계 서비스(Google AdSense, Google Analytics 등)가 쿠키와 광고 식별자를 사용할 수 있습니다.</li>' +
+        '<li>회원가입·로그인이 없는 사이트로, 이름·전화번호·주소 같은 개인정보를 직접 수집하지 않는다.</li>' +
+        '<li>다만 접속 과정에서 IP 주소, 브라우저 종류, 방문 일시, 방문 페이지 등이 자동으로 기록될 수 있다.</li>' +
+        '<li>광고·통계 서비스(Google AdSense, Google Analytics 등)가 쿠키와 광고 식별자를 사용할 수 있다.</li>' +
         '</ul>' +
         '<h3>2. 이용 목적</h3>' +
         '<ul><li>서비스 이용 통계 분석과 화면 개선</li><li>맞춤형 광고 게재 및 광고 성과 측정</li></ul>' +
         '<h3>3. 브라우저에만 저장되는 정보</h3>' +
         '<ul>' +
-        '<li>「내 이로치 체크」와 「이벤트 완료 체크」는 이용자 브라우저의 <strong>localStorage</strong>에만 저장되고 서버로 전송되지 않습니다.</li>' +
-        '<li>이 기록은 그 브라우저에만 남기 때문에 다른 기기에서는 보이지 않고, 브라우저 데이터를 지우면 함께 삭제됩니다.</li>' +
-        '<li>「복사」 버튼으로 복사한 검색식은 이용자 클립보드에만 들어가고 사이트가 따로 보관하지 않습니다.</li>' +
+        '<li>「내 이로치 체크」와 「이벤트 완료 체크」는 이용자 브라우저의 <strong>localStorage</strong>에만 저장되고 서버로 전송되지 않는다.</li>' +
+        '<li>이 기록은 그 브라우저에만 남기 때문에 다른 기기에서는 보이지 않고, 브라우저 데이터를 지우면 함께 삭제된다.</li>' +
+        '<li>「복사」 버튼으로 복사한 검색식은 이용자 클립보드에만 들어가고 사이트가 따로 보관하지 않는다.</li>' +
         '</ul>' +
         '<h3>4. 친구추가 게시판에 올린 정보</h3>' +
         '<ul>' +
-        '<li>「실시간 트레이너 코드 친구추가」에 입력한 <strong>닉네임·트레이너 코드·메모·팀·목적</strong>은 만료 시간(레이드 1시간, 선물·배틀 24시간)까지 Google Firebase Firestore에 공개 저장되고, 만료 후 노출이 중단됩니다.</li>' +
-        '<li>게시판은 로그인이 없는 공개 게시판이며, 이름·전화번호·이메일은 입력받지 않습니다. 저장 위치는 Google Cloud 서울 리전(asia-northeast3)입니다.</li>' +
-        '<li>게시글 수정·삭제는 화면에서 제공하지 않으며, 삭제 요청은 아래 문의 채널로 닉네임과 게시 시간을 알려 주시면 처리합니다.</li>' +
-        '<li>도배 방지 60초 제한 기록은 이용자 브라우저(localStorage)에만 남습니다.</li>' +
+        '<li>「실시간 트레이너 코드 친구추가」에 입력한 <strong>닉네임·트레이너 코드·메모·팀·목적</strong>은 만료 시간(레이드 1시간, 선물·배틀 24시간)까지 Google Firebase Firestore에 공개 저장되고, 만료 후 노출이 중단된다.</li>' +
+        '<li>게시판은 로그인이 없는 공개 게시판이며, 이름·전화번호·이메일은 입력받지 않는다. 저장 위치는 Google Cloud 서울 리전(asia-northeast3)이다.</li>' +
+        '<li>게시글 수정·삭제는 화면에서 제공하지 않으며, 삭제 요청은 아래 문의 채널로 닉네임과 게시 시간을 알려 주면 처리한다.</li>' +
+        '<li>도배 방지 60초 제한 기록은 이용자 브라우저(localStorage)에만 남는다.</li>' +
         '</ul>' +
         '<h3>5. 쿠키 및 제3자 광고</h3>' +
         '<ul>' +
-        '<li>Google을 비롯한 제3자 광고 사업자는 쿠키를 사용해 이용자의 이전 방문 기록에 기반한 광고를 게재할 수 있습니다.</li>' +
-        '<li>Google의 광고 쿠키 사용으로 이용자는 Google 광고 설정(adssettings.google.com)에서 맞춤 광고를 해제할 수 있습니다.</li>' +
-        '<li>맞춤 광고를 원하지 않으면 aboutads.info에서도 거부할 수 있습니다.</li>' +
-        '<li>브라우저 설정에서 쿠키 저장을 거부할 수 있으며, 이 경우 일부 기능 이용에 제한이 있을 수 있습니다.</li>' +
+        '<li>Google을 비롯한 제3자 광고 사업자는 쿠키를 사용해 이용자의 이전 방문 기록에 기반한 광고를 게재할 수 있다.</li>' +
+        '<li>Google의 광고 쿠키 사용으로 이용자는 Google 광고 설정(adssettings.google.com)에서 맞춤 광고를 해제할 수 있다.</li>' +
+        '<li>맞춤 광고를 원하지 않으면 aboutads.info에서도 거부할 수 있다.</li>' +
+        '<li>브라우저 설정에서 쿠키 저장을 거부할 수 있으며, 이 경우 일부 기능 이용에 제한이 있을 수 있다.</li>' +
         '</ul>' +
         '<h3>6. 보관 및 파기</h3>' +
-        '<p>자동 수집 정보는 목적 달성 후 지체 없이 파기하며, 법령에서 정한 기간 동안만 보관합니다.</p>' +
+        '<p>자동 수집 정보는 목적 달성 후 지체 없이 파기하며, 법령에서 정한 기간 동안만 보관한다.</p>' +
         '<h3>7. 이용자의 권리</h3>' +
-        '<p>이용자는 언제든지 자신의 정보 처리에 관한 열람·정정·삭제를 요청할 수 있습니다.</p>' +
+        '<p>이용자는 언제든지 자신의 정보 처리에 관한 열람·정정·삭제를 요청할 수 있다.</p>' +
         '<h3>8. 문의</h3>' +
-        '<p>개인정보 관련 문의는 운영자 이메일 <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a> 또는 하단 <strong>문의</strong> 메뉴로 접수해 주세요.</p>' +
+        '<p>개인정보 관련 문의는 운영자 이메일 <a href="mailto:redfilm24@gmail.com">redfilm24@gmail.com</a> 또는 하단 <strong>문의</strong> 메뉴로 접수해 주기 바란다.</p>' +
         '<p style="color:var(--muted)">시행일: 2026년 11월 27일</p>'
     },
     terms: {
       title: '이용약관',
       body:
-        '<h3>1. 목적</h3><p>본 약관은 「오박사의 포켓몬 백과사전」(이하 "사이트")가 제공하는 정보·계산 도구의 이용 조건을 정합니다.</p>' +
+        '<h3>1. 목적</h3><p>본 약관은 「오박사의 포켓몬 백과사전」(이하 "사이트")가 제공하는 정보·계산 도구의 이용 조건을 정한다.</p>' +
         '<h3>2. 서비스 내용</h3>' +
         '<ul><li>포켓몬고 이벤트 일정 및 카운트다운</li><li>레이드 보스 약점·추천 카운터 정보</li><li>타입 상성 계산기, 육성 비용 계산기</li><li>관련 가이드 콘텐츠</li></ul>' +
         '<h3>3. 정보의 정확성</h3>' +
-        '<p>사이트의 일정·배율·비용 정보는 공개된 자료를 정리한 참고용 정보입니다. 게임 업데이트로 내용이 달라질 수 있으며, 최종 수치는 게임 내 표시가 우선합니다. 사이트는 정보의 완전성·최신성을 보증하지 않습니다.</p>' +
+        '<p>사이트의 일정·배율·비용 정보는 공개된 자료를 정리한 참고용 정보이다. 게임 업데이트로 내용이 달라질 수 있으며, 최종 수치는 게임 내 표시가 우선한다. 사이트는 정보의 완전성·최신성을 보증하지 않는다.</p>' +
         '<h3>4. 지적재산권</h3>' +
-        '<p>Pokémon 및 Pokémon GO와 관련된 명칭·이미지·상표의 권리는 Nintendo, Creatures Inc., GAME FREAK inc., Niantic, Inc.에 있습니다. 본 사이트는 비공식 팬 사이트로, 이들과 제휴하거나 후원받지 않습니다.</p>' +
+        '<p>Pokémon 및 Pokémon GO와 관련된 명칭·이미지·상표의 권리는 Nintendo, Creatures Inc., GAME FREAK inc., Niantic, Inc.에 있다. 본 사이트는 비공식 팬 사이트로, 이들과 제휴하거나 후원받지 않는다.</p>' +
         '<h3>5. 책임의 제한</h3>' +
-        '<p>사이트 이용으로 발생한 게임 내 손실, 데이터 손실, 기타 손해에 대해 사이트 운영자는 책임을 지지 않습니다.</p>' +
+        '<p>사이트 이용으로 발생한 게임 내 손실, 데이터 손실, 기타 손해에 대해 사이트 운영자는 책임을 지지 않는다.</p>' +
         '<h3>6. 약관 변경</h3>' +
-        '<p>약관이 변경될 경우 본 페이지에 게시하며, 게시 시점부터 효력이 발생합니다.</p>' +
+        '<p>약관이 변경될 경우 본 페이지에 게시하며, 게시 시점부터 효력이 발생한다.</p>' +
         '<p style="color:var(--muted)">시행일: 2026년 11월 25일</p>'
     },
     contact: {
@@ -2363,23 +2393,23 @@
       title: '면책조항',
       body:
         '<h3>1. 정보의 성격</h3>' +
-        '<p>본 사이트의 일정·배율·육성 비용·공략은 공개된 게임 정보와 게임 내 표기를 정리한 <strong>참고 자료</strong>입니다. 게임 업데이트, 이벤트, 지역에 따라 실제 수치와 조건이 달라질 수 있으며, 최종 기준은 게임 화면입니다.</p>' +
+        '<p>본 사이트의 일정·배율·육성 비용·공략은 공개된 게임 정보와 게임 내 표기를 정리한 <strong>참고 자료</strong>이다. 게임 업데이트, 이벤트, 지역에 따라 실제 수치와 조건이 달라질 수 있으며, 최종 기준은 게임 화면이다.</p>' +
         '<h3>2. 보증하지 않는 것</h3>' +
-        '<p>정보의 완전성·최신성·특정 목적 적합성을 보증하지 않습니다. 본 사이트의 정보를 이용해 내린 육성·교환·구매 등의 판단과 그 결과에 대해 운영자는 책임을 지지 않습니다.</p>' +
+        '<p>정보의 완전성·최신성·특정 목적 적합성을 보증하지 않는다. 본 사이트의 정보를 이용해 내린 육성·교환·구매 등의 판단과 그 결과에 대해 운영자는 책임을 지지 않는다.</p>' +
         '<h3>3. 상표 및 제휴</h3>' +
-        '<p>Pokémon 및 Pokémon GO 관련 명칭·이미지·상표의 권리는 Nintendo, Creatures Inc., GAME FREAK inc., Niantic, Inc.에 있습니다. 본 사이트는 비공식 팬 사이트로, 이들과 제휴하거나 후원받지 않습니다.</p>' +
+        '<p>Pokémon 및 Pokémon GO 관련 명칭·이미지·상표의 권리는 Nintendo, Creatures Inc., GAME FREAK inc., Niantic, Inc.에 있다. 본 사이트는 비공식 팬 사이트로, 이들과 제휴하거나 후원받지 않는다.</p>' +
         '<h3>4. 제휴 링크 고지</h3>' +
-        '<p>사이트에는 쿠팡 파트너스·겜스고 등 제휴 링크 배너가 들어갈 수 있으며, 이를 통해 구매가 이루어지면 운영자가 일정액의 수수료를 받을 수 있습니다. 상품의 가격·조건·품질은 판매처가 정하는 것이며, 구매 결정은 이용자에게 있습니다.</p>' +
+        '<p>사이트에는 쿠팡 파트너스·겜스고 등 제휴 링크 배너가 들어갈 수 있으며, 이를 통해 구매가 이루어지면 운영자가 일정액의 수수료를 받을 수 있다. 상품의 가격·조건·품질은 판매처가 정하는 것이며, 구매 결정은 이용자에게 있다.</p>' +
         '<h3>5. 외부 링크</h3>' +
-        '<p>사이트에 연결된 외부 페이지의 내용과 개인정보 처리에는 운영자가 관여하지 않습니다.</p>' +
+        '<p>사이트에 연결된 외부 페이지의 내용과 개인정보 처리에는 운영자가 관여하지 않는다.</p>' +
         '<p style="color:var(--muted)">시행일: 2026년 11월 26일</p>'
     },
     about: {
       title: '소개',
       body:
         '<p>「오박사의 포켓몬 백과사전」은 포켓몬고를 오래 즐겨 온 트레이너가 매일 쓰려고 만든 도구 모음이란다.</p>' +
-        '<p>해외 일정 사이트는 시간이 현지 기준이라 매번 계산해야 하고, 카운터 정보는 여러 페이지를 오가야 했지. 그래서 <strong>한국 시간 기준 일정 · 약점과 카운터 · 육성 비용</strong>을 한 화면에 모았단다.</p>' +
-        '<p>광고는 서버 유지비를 위해 일정과 본문 사이의 빈 영역에만 넣고, 콘텐츠는 가리지 않는 원칙으로 운영하지.</p>' +
+        '<p>해외 일정 사이트는 시간이 현지 기준이라 매번 계산해야 하고, 카운터 정보는 여러 페이지를 오가야 했단다. 그래서 <strong>한국 시간 기준 일정 · 약점과 카운터 · 육성 비용</strong>을 한 화면에 모았단다.</p>' +
+        '<p>광고는 서버 유지비를 위해 일정과 본문 사이의 빈 영역에만 넣고, 콘텐츠는 가리지 않는 원칙으로 운영한단다.</p>' +
         '<p>운영: 오박사의 포켓몬 백과사전 (blog.naver.com/seopp)</p>'
     }
   };
@@ -2443,7 +2473,7 @@
       slot: 'events-top', partner: 'coupang', mark: '쿠팡',
       eyebrow: '포켓몬고 필수템 · 쿠팡',
       title: '포고플 오토캐치 — 자동 충전식 · 배터리 교체형',
-      desc: '켜 두면 알아서 몬스터볼을 던집니다.',
+      desc: '켜 두면 알아서 몬스터볼을 던진다.',
       cta: '쿠팡에서 보기',
       href: 'https://link.coupang.com/a/iYJYCkpdYW',
       aria: '쿠팡 파트너스 — 포고플 포켓몬고 오토캐치 상품 보기 (새 창)',
@@ -2453,7 +2483,7 @@
       slot: 'raids-bottom', partner: 'gamsgo', mark: '겜스고',
       eyebrow: '포켓코인 충전 · 겜스고',
       title: '포켓코인·레이드패스, 정가보다 최대 60% 저렴',
-      desc: '550+50부터 87,000+6,000 포켓코인까지, 계정으로 바로 충전합니다.',
+      desc: '550+50부터 87,000+6,000 포켓코인까지, 계정으로 바로 충전한다.',
       cta: '겜스고에서 보기',
       href: 'https://www.gamsgo.com/partner/cYpzj',
       aria: '겜스고 — 포켓몬고 포켓코인 충전 보기 (새 창)',
@@ -2463,7 +2493,7 @@
       slot: 'guide-mid', partner: 'coupang', mark: '쿠팡',
       eyebrow: '포켓몬고 필수템 · 쿠팡',
       title: '커뮤니티데이 3시간, 손가락 대신 포고플',
-      desc: '몬스터볼·사탕을 자동으로 모아 줍니다.',
+      desc: '몬스터볼·사탕을 자동으로 모아 준다.',
       cta: '쿠팡에서 보기',
       href: 'https://link.coupang.com/a/iYJYCkpdYW',
       aria: '쿠팡 파트너스 — 포고플 포켓몬고 오토캐치 상품 보기 (새 창)',
@@ -2571,12 +2601,12 @@
   var SG_PRESETS = [
     {
       id: 'doctor', label: '박사 보내기용',
-      note: '100%·이로치·그림자·전설·환상·울트라비스트·코스튬·즐겨찾기·태그·특별한 기술·럭키를 빼고 남긴단다. 여기 나오는 포켓몬이 보내기 후보지.',
+      note: '100%·이로치·그림자·전설·환상·울트라비스트·코스튬·즐겨찾기·태그·특별한 기술·럭키를 빼고 남긴단다. 여기 나오는 포켓몬이 보내기 후보란다.',
       state: { ex: sgAllEx(), grade: '', days: '', iv: '', cp: '' }
     },
     {
       id: 'pvp', label: '배틀리그 0공격',
-      note: '공격은 낮고 방어·HP가 높은 배틀리그형 개체를 찾는단다. CP를 같이 고르면 슈퍼·하이퍼리그 상한 안에 있는 것만 남지.',
+      note: '공격은 낮고 방어·HP가 높은 배틀리그형 개체를 찾는단다. CP를 같이 고르면 슈퍼·하이퍼리그 상한 안에 있는 것만 남는단다.',
       state: { ex: sgBlankEx(), grade: '', days: '', iv: '0-1공격&3-4방어&3-4HP', cp: '' }
     },
     {
@@ -2601,7 +2631,7 @@
     },
     {
       id: 'evolve', label: '도감 신규 진화',
-      note: '지금 진화할 수 있고, 진화한 모습이 아직 도감에 없는 포켓몬만 보여 준단다. 도감 채울 때 좋지.',
+      note: '지금 진화할 수 있고, 진화한 모습이 아직 도감에 없는 포켓몬만 보여 준단다. 도감 채울 때 좋단다.',
       state: { ex: sgBlankEx(), grade: '', days: '', iv: '', cp: '', only: '진화&미등록' }
     }
   ];
@@ -2919,7 +2949,7 @@
       (a.weak.length ? '<b>' + a.weak.slice(0, 3).map(function (d) { return d.ko; }).join('·') + '</b>에 약하고, ' : '') +
       (a.uncovered.length ? '<b>' + a.uncovered.length + '개 타입</b>을 못 찐단다.' : '18개 타입을 모두 찌를 수 있단다.');
 
-    box.innerHTML = '<p class="party-summary">' + summary + (mons.length < 3 ? ' <span class="party-tip">(' + (3 - mons.length) + '마리 더 넣으면 더 정확해져요)</span>' : '') + '</p>' +
+    box.innerHTML = '<p class="party-summary">' + summary + (mons.length < 3 ? ' <span class="party-tip">(' + (3 - mons.length) + '마리 더 넣으면 더 정확해진단다)</span>' : '') + '</p>' +
       '<div class="party-block"><h4 class="party-h">방어 약점 — 두 마리 이상 같이 약한 타입</h4><div class="party-chips">' + weakHTML + '</div></div>' +
       '<div class="party-block"><h4 class="party-h">공격 커버리지 — 자속으로 못 찌르는 타입 (' + (18 - a.coveredCount) + '개)</h4><div class="party-chips">' + uncHTML + '</div></div>' +
       '<div class="party-block"><h4 class="party-h">주의할 상위 메타</h4><div class="threat-list">' + threatHTML + '</div></div>';
@@ -3085,7 +3115,7 @@
       return;
     }
     if (res.max) {
-      verdictEl.innerHTML = '<p class="rc-empty">맥스배틀은 일반 레이드와 계산이 다르단다. 같은 타입 맥스무브를 가진 다이맥스 3마리를 준비하는 쪽이 먼저지.</p>';
+      verdictEl.innerHTML = '<p class="rc-empty">맥스배틀은 일반 레이드와 계산이 다르단다. 같은 타입 맥스무브를 가진 다이맥스 3마리를 준비하는 쪽이 먼저란다.</p>';
       tableEl.innerHTML = '';
       noteEl.textContent = '';
       return;
@@ -3105,7 +3135,7 @@
     } else if (safeOk) {
       line = '<b>' + firstOk + '명</b>부터 가능하고, <b>' + safeOk + '명</b>이면 여유 있게 깬단다.';
     } else {
-      line = '<b>' + firstOk + '명</b>부터 가능하지만 시간이 꽤 빠듯하단다. 한 명 더 모으면 안정적이지.';
+      line = '<b>' + firstOk + '명</b>부터 가능하지만 시간이 꽤 빠듯하단다. 한 명 더 모으면 안정적이란다.';
     }
 
     verdictEl.innerHTML =
@@ -3128,10 +3158,10 @@
     }).join('') + '</div>';
 
     noteEl.textContent = '보스 HP ' + num(res.info.hp) + ' · 제한 시간 ' + res.info.limit + '초 기준이란다. TOP 6 카운터 6마리를 모두 보유했다고 보고 ' +
-      '평균 ' + res.meanDps.toFixed(1) + ' DPS(레벨 40·개체값 15)를 바탕으로 레벨·날씨·프렌드 보너스를 반영했지' +
+      '평균 ' + res.meanDps.toFixed(1) + ' DPS(레벨 40·개체값 15)를 바탕으로 레벨·날씨·프렌드 보너스를 반영했단다' +
       (rcState.weather ? ' (날씨 부스트 해당 카운터 ' + res.boostedCount + '/' + res.count + '마리)' : '') +
       '. 교체·리로비·회피 손실 20%를 빼서 계산한 추정값이라, 실제 클리어는 파티와 플레이에 따라 달라진단다' +
-      (res.info.shield ? '. 슈퍼 메가 레이드는 방패를 깨는 메가진화가 있어야 해서 더 오래 걸릴 수 있지.' : '.');
+      (res.info.shield ? '. 슈퍼 메가 레이드는 방패를 깨는 메가진화가 있어야 해서 더 오래 걸릴 수 있단다.' : '.');
   }
 
   function initRaidCount() {
